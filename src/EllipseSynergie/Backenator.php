@@ -1,8 +1,8 @@
 <?php 
 namespace EllipseSynergie;
 
-use Buzz\Browser as Client;
-use Buzz\Client\Curl as CurlClientInterface;
+use \Buzz\Browser as Client;
+use \Buzz\Client\Curl as CurlClientInterface;
 
 /**
  * Model base class
@@ -11,12 +11,6 @@ use Buzz\Client\Curl as CurlClientInterface;
  */
 abstract class Backenator {
 
-	/**
-	 * Status
-	 */
-	const STATUS_ACTIVE   = 'active';
-	const STATUS_INACTIVE = 'inactive';
-	const STATUS_DELETED  = 'deleted';
 	
 	/**
 	 * Containt the currect object data
@@ -135,10 +129,7 @@ abstract class Backenator {
 		$this->fill($attributes, true);
 		
 		//Factory the client
-		$this->clientFactory($client);
-		
-		//Define the base url
-		$this->_base_url = Config::get('app.backend.uri');		
+		$this->clientFactory($client);	
 		
 		//Boot model
 		if ( ! isset(static::$booted[get_class($this)]))
@@ -162,7 +153,7 @@ abstract class Backenator {
 	/**
 	 * Create a new client
 	 */
-	public function clientFactory(Buzz\Browser $client = null)
+	public function clientFactory(\Buzz\Browser $client = null)
 	{
 		//If we have a custom client
 		if (!empty($client)) {
@@ -279,6 +270,7 @@ abstract class Backenator {
 		//Build the url
 		$url = $this->_base_url . $this->buildUriString(); 
 		
+		/*
 		// User's token
 		if (Session::get('token') != false) {
 			$this->_params['token'] = Session::get('token');
@@ -286,7 +278,7 @@ abstract class Backenator {
 		// Class's token
 		if (Session::get('ctoken') != false) {
 			$this->_params['ctoken'] = Session::get('ctoken');
-		}
+		}*/
 		
 		//Add the custom params to the query
 		$url .= '?' . http_build_query($this->_params);
@@ -313,10 +305,7 @@ abstract class Backenator {
 	 * @return Backenator|boolean
 	 */
 	public function first()
-	{
-		//Fire event
-		Event::fire('model.' . $this->getModelUri() . '.read', array($this->getModelUri(), 'read'));
-		
+	{		
 		//Default
 		$first = array();
 	
@@ -369,10 +358,7 @@ abstract class Backenator {
 	 * @return mixed
 	 */
 	public function get()
-	{				
-		//Fire event
-		Event::fire('model.' . $this->getModelUri() . '.read', array($this->getModelUri(), 'read'));
-		
+	{						
 		//Default
 		$results = array();
 		
@@ -439,10 +425,7 @@ abstract class Backenator {
 	 * @return mixed;
 	 */
 	public function post()
-	{		
-		//Fire event
-		Event::fire('model.' . $this->getModelUri() . '.create', array($this->getModelUri(), 'create'));
-		
+	{				
 		//Build the url
 		$url = $this->buildRequestUrl();
 		
@@ -491,10 +474,7 @@ abstract class Backenator {
 	 * @return mixed;
 	 */
 	public function put()
-	{
-		//Fire event
-		Event::fire('model.' . $this->getModelUri() . '.update', array($this->getModelUri(), 'update'));
-		
+	{		
 		//Build the url
 		$url = $this->buildRequestUrl();
 		
@@ -541,10 +521,7 @@ abstract class Backenator {
 	 * @return mixed;
 	 */
 	public function delete()
-	{		
-		//Fire event
-		Event::fire('model.' . $this->getModelUri() . '.delete', array($this->getModelUri(), 'delete'));
-		
+	{				
 		//Add the find id
 		$this->_find_id = $this->id;
 		
@@ -773,10 +750,6 @@ abstract class Backenator {
 	 */
 	public function log($method, $url, $result)
 	{
-		// Log...
-		if (Config::get("app.backend.logging") == true) {
-			File::append(dirname(__FILE__).'/../storage/logs/backend-'.date('Y-m-d').'.log', date('Y-m-d H:i:s').' - ' . $method . ' ' . $url . print_r($result, true) . PHP_EOL);
-		}
 	} // log()
 	
 	/**
@@ -953,7 +926,7 @@ abstract class Backenator {
 		if ($response->getStatusCode() == 401){
 			
 			//Fire invalid token event
-			Event::fire('invalid_token');		
+			#Event::fire('invalid_token');		
 		} 
 		
 		//Iif we have errors
