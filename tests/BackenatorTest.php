@@ -2,6 +2,7 @@
 
 use Mockery as m;
 use EllipseSynergie\Backenator;
+use Buzz\Message\Response;
 
 /**
  * Test for the Classrom model
@@ -26,9 +27,6 @@ class BackenatorTest extends PHPUnit_Framework_TestCase {
 	{
 		//Setup from Laravel
 		parent::setUp();	
-
-		//Bind stub to model
-		App::bind('Event', function() { return new BackenatorTest_Event; });
 	}
 	
 	public function testUnsetAttribute()
@@ -65,7 +63,7 @@ class BackenatorTest extends PHPUnit_Framework_TestCase {
 		$model->foo = 'bar';		
 
 		$data = $model->toArray();
-		$this->assertIsArray($data);		
+		$this->assertTrue(is_array($data));		
 	}
 	
 	public function testToJson()
@@ -74,7 +72,7 @@ class BackenatorTest extends PHPUnit_Framework_TestCase {
 		$model->foo = 'bar';
 	
 		$data = $model->toJson();
-		$this->assertIsString($data);
+		$this->assertTrue(is_string($data));
 	}
 	
 	public function testFireErrorsWithHttp401()
@@ -306,7 +304,7 @@ class BackenatorTest extends PHPUnit_Framework_TestCase {
 		//Add segment
 		$model->addUriSegment('test')->where('foo', 'bar')->where('bar', 'foo');
 		
-		$this->assertEquals(Config::get('app.backend.uri') . 'foo/test?foo=bar&bar=foo', $model->buildRequestUrl());
+		$this->assertEquals('foo/test?foo=bar&bar=foo', $model->buildRequestUrl());
 	}
 	
 	public function testIsFillable()
