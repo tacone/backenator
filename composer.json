@@ -5,8 +5,16 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Ellipse Synergie",
-            "email": "info@ellipse-synergie.com"
+            "name": "Maxime Beaudoin",
+            "email": "maxime.beaudoin@ellipse-synergie.com",
+            "homepage": "http://ellipse-synergie.com",
+            "role": "Developer"
+        },
+        {
+            "name": "Dominic Martineau",
+            "email": "dominic.martineau@ellipse-synergie.com",
+            "homepage": "http://ellipse-synergie.com",
+            "role": "Developer"
         }
     ],
 	"require": {
