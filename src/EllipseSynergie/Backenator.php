@@ -230,60 +230,17 @@ abstract class Backenator extends Eloquent {
 		$this->log('GET', $url, $response->getContent());
 		
 		//Handle the get method
-		$result = $this->handleGet($content, $response);
+		$result = $this->newQuery()->get($content, $response);
+		
+		//If we have a result
+		if(!empty($result)){				
+			$result = $this->newQuery()->buildResults($content);
+		}
 		
 		//Set the request response
 		$this->setResponse($response);
 		
 		return $result;		
-	}
-	
-	/**
-	 * Handle the get method
-	 * 
-	 * @param object $content
-	 * @return Backenator|array|false
-	 */
-	protected function handleGet($content, \Buzz\Message\Response $response)
-	{
-		//Default
-		$results = array();
-		
-		//If we have content
-		if (!empty($content->results)) {
-		
-			//For each data result
-			foreach ($content->results as $result) {
-					
-				//Create a new modal object
-				$object = $this->newInstance(array(), true);
-				
-				//For each result data
-				foreach ($result as $datak => $datav) {
-				
-					//Force attribute set
-					$object->setAttribute($datak, $datav);
-				}
-					
-				//Push the object in the results
-				array_push($results, $object);
-			}
-	
-			// Set results count
-			if (!empty($content->count)) {
-				$this->setPerPage($content->count);
-			}
-	
-			//If we only have one result
-			if(count($results) === 1){
-				return $results[0];
-			}
-				
-			//Return the results
-			return $results;
-		}
-			
-		return false;
 	}
 	
 	/**
@@ -309,7 +266,17 @@ abstract class Backenator extends Eloquent {
 		$this->log('POST', $url, $response->getContent());
 		
 		//Handle the post method
-		$result = $this->handlePost($content, $response);
+		$result = $this->newQuery()->post($content, $response);
+		
+		//If we have a result
+		if(!empty($result)){
+		
+			//Force attribute set
+			$this->setAttribute($this->primaryKey, $content->{$this->primaryKey});
+			$this->setAttribute(self::CREATED_AT, $content->{self::CREATED_AT});
+			
+			$this->exists = true;
+		}
 		
 		//Set the request response
 		$this->setResponse($response);
@@ -317,28 +284,7 @@ abstract class Backenator extends Eloquent {
 		return $result;		
 	}
 	
-	/**
-	 * Handle the post method
-	 *
-	 * @param object $content
-	 * @return bool
-	 */
-	protected function handlePost($content, \Buzz\Message\Response $response)
-	{
-		//If we have content
-		if(!empty($content->{$this->primaryKey})) {
-				
-			//Force attribute set
-			$this->setAttribute($this->primaryKey, $content->{$this->primaryKey});
-			$this->setAttribute(self::CREATED_AT, $content->{self::CREATED_AT});
-			
-			$this->exists = true;
-		
-			return true;		
-		}
-		
-		return false;
-	}
+	
 	
 	/**
 	 * Request PUT on backend
@@ -363,34 +309,21 @@ abstract class Backenator extends Eloquent {
 		$this->log('PUT', $url, $response->getContent());
 		
 		//Handle the put method
-		$result = $this->handlePut($content, $response);
+		$result = $this->newQuery()->put($content, $response);
+		
+		//If we have a result
+		if(!empty($result)){
+		
+			//Force attribute set
+			$this->setAttribute(self::UPDATED_AT, $content->{self::UPDATED_AT});
+			
+			$this->exists = true;
+		}
 		
 		//Set the request response
 		$this->setResponse($response);
 		
 		return $result;		
-	}
-	
-	/**
-	 * Handle the put method
-	 *
-	 * @param object $content
-	 * @return bool
-	 */
-	protected function handlePut($content, \Buzz\Message\Response $response)
-	{
-		//If we have content
-		if(!empty($content)){
-					
-			//Force attribute set
-			$this->setAttribute(self::UPDATED_AT, $content->{self::UPDATED_AT});
-			
-			$this->exists = true;
-					
-			return true;
-		}
-		
-		return false;
 	}
 	
 	/**
@@ -416,7 +349,16 @@ abstract class Backenator extends Eloquent {
 		$this->log('DELETE', $url, $response->getContent());
 		
 		//Handle the delete method
-		$result = $this->handleDelete($content, $response);
+		$result = $this->newQuery()->delete($content, $response);
+		
+		//If we have a result
+		if(!empty($result)){
+			
+			//Force attribute set
+			$this->setAttribute(self::DELETED_AT, $content->{self::DELETED_AT});
+			
+			$this->exists = false;
+		}
 		
 		//Set the request response
 		$this->setResponse($response);
@@ -426,25 +368,21 @@ abstract class Backenator extends Eloquent {
 	}
 	
 	/**
-	 * Handle the put method
+	 * Get a new query builder for the model's table.
 	 *
-	 * @param object $content
-	 * @return bool
+	 * @param  bool  $excludeDeleted
+	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	protected function handleDelete($content, \Buzz\Message\Response $response)
-	{	
-		//If we have content
-		if(!empty($content)){
-					
-			//Force attribute set
-			$this->setAttribute(self::DELETED_AT, $content->{self::DELETED_AT});
-			
-			$this->exists = false;
+	public function newQuery($excludeDeleted = true)
+	{
+		$builder = new Backenator\Builder;
 		
-			return true;
-		}
-		
-		return false;
+		// Once we have the query builders, we will set the model instances so the
+		// builder can easily access any information it may need from the model
+		// while it is constructing and executing various queries against it.
+		$builder->setModel($this);
+	
+		return $builder;
 	}
 	
 	/**
