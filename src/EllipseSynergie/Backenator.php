@@ -18,7 +18,7 @@ abstract class Backenator extends Eloquent {
 	 * 
 	 * @var Buzz\Browser
 	 */
-	protected $_client;
+	protected $client;
 	
 	/**
 	 * The base url of the API
@@ -33,21 +33,21 @@ abstract class Backenator extends Eloquent {
 	 * 
 	 * @var MessageBag
 	 */
-	protected $_errors;
+	protected $errors;
 	
 	/**
 	 * The query string parameters
 	 * 
 	 * @var array
 	 */
-	protected $_params = array();
+	protected $params = array();
 	
 	/**
 	 * URI segments of the request
 	 * 
 	 * @var array
 	 */
-	protected $_segments = array();
+	protected $segments = array();
 	
 	/**
 	 * Constructor
@@ -64,7 +64,7 @@ abstract class Backenator extends Eloquent {
 		$this->clientFactory($client);		
 
 		//Create errors message bag
-		$this->_errors = new MessageBag;
+		$this->errors = new MessageBag;
 	}
 	
 	/**
@@ -78,13 +78,13 @@ abstract class Backenator extends Eloquent {
 		if (!empty($client)) {
 			
 			//Set the client
-			$this->_client = $client;
+			$this->client = $client;
 			
 		//Else, build a new one we a default Buzz\Browser object
 		} else {
 			
 			//Create the Rest Client
-			$this->_client = new Client(new CurlClientInterface());
+			$this->client = new Client(new CurlClientInterface());
 		}		
 	}
 	
@@ -97,7 +97,7 @@ abstract class Backenator extends Eloquent {
 	public static function find($id)
 	{	
 		//Create the new instance
-		$instance = new static;
+		$instance = $this->newInstance(array(), true);
 		$instance->segment($id);
 	
 		return $instance->first();	
@@ -113,7 +113,7 @@ abstract class Backenator extends Eloquent {
 	public function where($field, $value)
 	{	
 		//Add param to the current object
-		$this->_params[$field] = $value;
+		$this->params[$field] = $value;
 	
 		return $this;	
 	}
@@ -127,7 +127,7 @@ abstract class Backenator extends Eloquent {
 	public function segment($segment)
 	{
 		//Encode and push a new segment into the array
-		$this->_segments[] = urlencode($segment);
+		$this->segments[] = urlencode($segment);
 	
 		return $this;	
 	}
@@ -142,8 +142,13 @@ abstract class Backenator extends Eloquent {
 		//Build the url
 		$url = $this->base_url . $this->uri(); 
 		
-		//Add query string parameters to the URL
-		$url .= '?' . http_build_query($this->_params);
+		//If we have parameters
+		if(!empty($this->params)){
+		
+			//Add query string parameters to the URL
+			$url .= '?' . http_build_query($this->params);
+			
+		}
 		
 		return $url;		
 	}
@@ -159,18 +164,15 @@ abstract class Backenator extends Eloquent {
 		$uri = $this->table . '/';
 	
 		//If we have segment to add
-		if(!empty($this->_segments))
+		if(!empty($this->segments))
 		{
 			//for each segment to add
-			foreach ($this->_segments as $segment)
+			foreach ($this->segments as $segment)
 			{
 				//Add the segment to the final URI
 				$uri .= $segment . '/';
 			}
 		}
-	
-		//Unset the uri segments for the next resquest
-		$this->_segments = array();
 	
 		//Return the uri and remove the latest trailing slash
 		return substr($uri, 0, -1);
@@ -183,7 +185,7 @@ abstract class Backenator extends Eloquent {
 	 */
 	public function client()
 	{
-		return $this->_client;		
+		return $this->client;		
 	}
 	
 	/**
@@ -193,50 +195,6 @@ abstract class Backenator extends Eloquent {
 	 */
 	public function first()
 	{		
-		//Default
-		$first = array();
-	
-		//Build the url
-		$url = $this->buildRequestUrl();
-	
-		//Do the get resquest to the Backend
-		$response = $this->client()->get($url);
-	
-		//Convert response to json
-		$content = json_decode($response->getContent());
-	
-		//Log the request
-		$this->log('GET', $url, $response->getContent());
-	
-		//If we have content
-		if(!empty($content)){
-	
-			//If the API request succeed
-			if ($content->success == true) {
-	
-				//If we have results
-				if(!empty($content->results))
-				{
-					//Get the first element
-					$first = array_shift($content->results);
-						
-				}
-	
-				//For each result
-				foreach ($first as $datak => $datav) {
-	
-					//Set the data to the model object
-					$this->setAttribute($datak, $datav);
-				}
-					
-			//Else the API request fail
-			} else {				
-				$this->clientErrors($response);
-			}
-		}
-			
-		return $this;
-	
 	}
 	
 	/**
@@ -245,10 +203,7 @@ abstract class Backenator extends Eloquent {
 	 * @return mixed
 	 */
 	public function get()
-	{						
-		//Default
-		$results = array();
-		
+	{								
 		//Build the url
 		$url = $this->url();
 		
@@ -261,51 +216,67 @@ abstract class Backenator extends Eloquent {
 		//Log the request
 		$this->log('GET', $url, $response->getContent());
 		
-		//If we have content
-		if (!empty($content)) {
+		//Handle the get method
+		$result = $this->handleGet($content, $response);
 		
-			//If the API request succeed
-			if ($content->success == true) {
-						
-				//For each data result 
-				foreach ($content->results as $result) {
+		//Set the request response
+		$this->setResponse($response);
+		
+		return $result;		
+	}
+	
+	/**
+	 * Handle the get method
+	 * 
+	 * @param object $content
+	 * @return mixed
+	 */
+	protected function handleGet($content, \Buzz\Message\Response $response)
+	{
+		//Default
+		$results = array();
+		
+		//If we have content
+		if (!empty($content->results)) {
+		
+			//For each data result
+			foreach ($content->results as $result) {
 					
-					//Create a new modal object
-					$object = new static;
-			
-					//For each result
-					foreach ($result as $datak => $datav) {
-						
-						//Set the data to the model object
-						$object->setAttribute($datak, $datav);
-					}
-			
-					//Push the object in the results
-					array_push($results, $object);
+				//Create a new modal object
+				$object = $this->newInstance(array(), true);
+				
+				//For each result data
+				foreach ($result as $datak => $datav) {
+				
+					//Force attribute set
+					$object->setAttribute($datak, $datav);
 				}
-
-				// Set results count
-				if (!empty($content->count)) {
-					$this->setPerPage($content->count);
-				}
-			
-				//Return the results
-				return $results;
-			
-			//Else we have a errors
-			} else {		
-				$this->clientErrors($response);
-			}			
+					
+				//Push the object in the results
+				array_push($results, $object);
+			}
+	
+			// Set results count
+			if (!empty($content->count)) {
+				$this->setPerPage($content->count);
+			}
+	
+			//If we only have one result
+			if(count($results) === 1){
+				return $results[0];
+			}
+				
+			//Return the results
+			return $results;
 		}
 			
 		return false;
-		
 	}
 	
 	/**
 	 * Request POST on backend
 	 * 
-	 * @return mixed;
+	 * @return bool
 	 */
 	public function post()
 	{				
@@ -324,33 +295,43 @@ abstract class Backenator extends Eloquent {
 		//Log the request
 		$this->log('POST', $url, $response->getContent());
 		
-		//If we have content
-		if(!empty($content)) {
+		//Handle the post method
+		$result = $this->handlePost($content, $response);
 		
-			//If the request success
-			if ($content->success == true) {
+		//Set the request response
+		$this->setResponse($response);
+		
+		return $result;		
+	}
+	
+	/**
+	 * Handle the post method
+	 *
+	 * @param object $content
+	 * @return bool
+	 */
+	protected function handlePost($content, \Buzz\Message\Response $response)
+	{
+		//If we have content
+		if(!empty($content->{$this->primaryKey})) {
 				
-				//Set attribute
-				$this->setAttribute('id', $content->id);
-				$this->setAttribute('created_at', $content->created_at);
+			//Force attribute set
+			$this->setAttribute($this->primaryKey, $content->{$this->primaryKey});
+			$this->setAttribute('created_at', $content->created_at);
 			
-				return $content;
-			
-			//Else we have a errors
-			} else {		
-				$this->clientErrors($response);
-			}			
+			$this->exists = true;
+		
+			return true;		
 		}
 		
 		return false;
-		
 	}
 	
 	/**
 	 * Request PUT on backend
 	 *
 	 * @todo replace the putfile when the backend will be updated
-	 * @return mixed;
+	 * @return bool;
 	 */
 	public function put()
 	{		
@@ -369,31 +350,41 @@ abstract class Backenator extends Eloquent {
 		//Log the request
 		$this->log('PUT', $url, $response->getContent());
 		
+		//Handle the put method
+		$result = $this->handlePut($content, $response);
+		
+		//Set the request response
+		$this->setResponse($response);
+		
+		return $result;		
+	}
+	
+	/**
+	 * Handle the put method
+	 *
+	 * @param object $content
+	 * @return bool
+	 */
+	protected function handlePut($content, \Buzz\Message\Response $response)
+	{
 		//If we have content
 		if(!empty($content)){
-		
-			//If the request success
-			if ($content->success == true) {
+					
+			//Force attribute set
+			$this->setAttribute('updated_at', $content->updated_at);
 			
-				//Set attribute
-				$this->setAttribute('updated_at', $content->updated_at);
-			
-				return $content;
-			
-			//Else we have a errors
-			} else {		
-				$this->clientErrors($response);
-			}			
+			$this->exists = true;
+					
+			return true;
 		}
 		
 		return false;
-		
 	}
 	
 	/**
 	 * Request DELETE on backend
 	 *
-	 * @return mixed;
+	 * @return bool;
 	 */
 	public function delete()
 	{				
@@ -412,25 +403,36 @@ abstract class Backenator extends Eloquent {
 		//Log the request
 		$this->log('DELETE', $url, $response->getContent());
 		
+		//Handle the delete method
+		$result = $this->handleDelete($content, $response);
+		
+		//Set the request response
+		$this->setResponse($response);
+		
+		return $result;
+		
+	}
+	
+	/**
+	 * Handle the put method
+	 *
+	 * @param object $content
+	 * @return bool
+	 */
+	protected function handleDelete($content, \Buzz\Message\Response $response)
+	{	
 		//If we have content
 		if(!empty($content)){
-		
-			//If the request success
-			if ($content->success == true) {
 					
-				//Set attribute
-				$this->setAttribute('deleted_at', $content->deleted_at);
+			//Force attribute set
+			$this->setAttribute('deleted_at', $content->deleted_at);
 			
-				return $content;
-			
-			//Else we have a errors
-			} else {		
-				$this->clientErrors($response);
-			}
+			$this->exists = false;
+		
+			return true;
 		}
 		
 		return false;
-		
 	}
 	
 	/**
@@ -451,54 +453,39 @@ abstract class Backenator extends Eloquent {
 	 */
 	public function success()
 	{
-		return (count($this->_errors) == 0 ? true : false);
+		return (count($this->errors) == 0 ? true : false);
 	
 	}
 	
 	/**
-	 * Check if error $errorName is present
+	 * Check if request has fail
 	 *
-	 * @param string $errorName
 	 * @return bool
 	 */
 	public function fail($errorName)
 	{
-		if (!empty($this->_errors[$errorName])) {
-			return true;
-		}
-	
-		return false;
-	
+		return $this->success()? false : true;	
 	}	
 	
 	/**
-	 * Fire errors events and other things
+	 * Set the response
 	 * 
-	 * @param unknown $response
+	 * @param \Buzz\Message\Response $response
 	 */
-	public function clientErrors($response)
+	public function setResponse(\Buzz\Message\Response $response)
+	{		
+		$this->response = $response;
+	}
+	
+	/**
+	 * Return the response object
+	 *
+	 * @return \Buzz\Message\Response|null
+	 */
+	public function getResponse()
 	{
-		//Get the query result
-		$result = json_decode($response->getContent());
-			
-		//Debug
-		#$this->_debug['status_code'] = $response->getStatusCode();
-		#$this->_debug['headers'] = $response->getHeaders();
-		#$this->_debug['content'] = $response->getContent();
-		
-		//If we have a 401 error
-		if ($response->getStatusCode() == 401){
-			
-			//Fire invalid token event
-			#Event::fire('invalid_token');		
-		} 
-		
-		//Iif we have errors
-		if (!empty($result->errors)) {				
-			$this->_errors = $result->errors;			
-		}
-
-	} // clientErrors()
+		$this->response;		
+	}
 	
 	/**
 	 * Save the model to the database.
@@ -508,7 +495,7 @@ abstract class Backenator extends Eloquent {
 	public function save()
 	{				
 		//If the primary key attribute is set
-		if ($this->getAttribute($this->primaryKey)) {			
+		if ($this->getAttribute($this->primaryKey)) {
 			
 			//Update the element
 			return $this->put();	
@@ -518,8 +505,17 @@ abstract class Backenator extends Eloquent {
 			
 			//Create a new element
 			return $this->post();
-		}
-		
+		}		
+	}
+	
+	/**
+	 * Get errors
+	 * 
+	 * @return MessageBag
+	 */
+	public function errors()
+	{
+		return $this->errors;			
 	}
 	
 	/**
@@ -531,14 +527,5 @@ abstract class Backenator extends Eloquent {
 	{
 		return 'Y-m-d H:i:s';
 	}
-	
-	/**
-	 * Get errors
-	 */
-	public function errors()
-	{
-		return $this->_errors;
-			
-	} // getErrors()
 
-} // Backenator
+}
