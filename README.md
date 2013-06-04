@@ -27,7 +27,7 @@ class User extends Backenator {
      *
      * @var array
      */
-    protected $_fillable = array();
+    protected $fillable = array();
 
 }
 ```
@@ -41,23 +41,24 @@ $user = self::find(1); // GET http://api.example.com/users/1
 ### Querying
 
 ```php
-$users = $this->addUriSegment('newest')->get(); // GET http://api.example.com/users/newest
-$users = $this->addUriSegment('newest')->where('limit', 10)->get(); // GET http://api.example.com/users/newest?limit=10
-$user = $this->addUriSegment(1)->first(); // GET http://api.example.com/users/1
+$users = $this->segment('newest')->get(); // GET http://api.example.com/users/newest
+$users = $this->segment('newest')->where('limit', 10)->get(); // GET http://api.example.com/users/newest?limit=10
+$user = $this->segment(1)->first(); // GET http://api.example.com/users/1
 ```
 
 ### Creating
 
 ```php
-$this->firstname = 'John';
-$this->lastname = 'Doe';
-$this->save(); // POST http://api.example.com/users
+$user = new User;
+$user->firstname = 'John';
+$user->lastname = 'Doe';
+$user->save(); // POST http://api.example.com/users
 ```
 
 ### Updating
 
 ```php
-$user = self::find(1);
+$user = User::find(1);
 $user->firstname = 'Johnny';
 $user->save(); // PUT http://api.example.com/users/1
 ```
@@ -65,7 +66,7 @@ $user->save(); // PUT http://api.example.com/users/1
 ### Deleting
 
 ```php
-$this->addUriSegment(1)->delete(); // DELETE http://api.example.com/users/1
+$this->segment(1)->delete(); // DELETE http://api.example.com/users/1
 ```
 
 ## Authors
