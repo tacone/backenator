@@ -25,7 +25,7 @@ abstract class Backenator extends Eloquent {
 	 * 
 	 * @var string
 	 */
-	public $base_url;
+	public $baseUrl;
 	
 	/**
 	 * Errors message bag use to set and get errors 
@@ -92,9 +92,10 @@ abstract class Backenator extends Eloquent {
 	 * Find a model by its primary key.
 	 *
 	 * @param  mixed  $id
+	 * @param  array  $columns
 	 * @return Backenator
 	 */
-	public static function find($id)
+	public static function find($id, $columns = array())
 	{	
 		//Create the new instance
 		$instance = $this->newInstance(array(), true);
@@ -140,7 +141,7 @@ abstract class Backenator extends Eloquent {
 	public function url()
 	{		
 		//Build the url
-		$url = $this->base_url . $this->uri(); 
+		$url = $this->getBaseUrl() . $this->uri(); 
 		
 		//If we have parameters
 		if(!empty($this->params)){
@@ -191,16 +192,28 @@ abstract class Backenator extends Eloquent {
 	/**
 	 * Retrieve the first element
 	 *
-	 * @return Backenator|boolean
+	 * @return Backenator|bool
 	 */
 	public function first()
 	{		
+		//Get elements
+		$result = $this->get();
+		
+		//If we have multiple result
+		if(is_array($result)){	
+
+			//Get the first array element
+			reset($result);
+			return current($result);
+		}
+		
+		return $result;
 	}
 	
 	/**
 	 * Request GET on backend
 	 *
-	 * @return mixed
+	 * @return Backenator|array
 	 */
 	public function get()
 	{								
@@ -229,7 +242,7 @@ abstract class Backenator extends Eloquent {
 	 * Handle the get method
 	 * 
 	 * @param object $content
-	 * @return mixed
+	 * @return Backenator|array|false
 	 */
 	protected function handleGet($content, \Buzz\Message\Response $response)
 	{
@@ -317,7 +330,7 @@ abstract class Backenator extends Eloquent {
 				
 			//Force attribute set
 			$this->setAttribute($this->primaryKey, $content->{$this->primaryKey});
-			$this->setAttribute('created_at', $content->created_at);
+			$this->setAttribute(self::CREATED_AT, $content->{self::CREATED_AT});
 			
 			$this->exists = true;
 		
@@ -330,7 +343,6 @@ abstract class Backenator extends Eloquent {
 	/**
 	 * Request PUT on backend
 	 *
-	 * @todo replace the putfile when the backend will be updated
 	 * @return bool;
 	 */
 	public function put()
@@ -371,7 +383,7 @@ abstract class Backenator extends Eloquent {
 		if(!empty($content)){
 					
 			//Force attribute set
-			$this->setAttribute('updated_at', $content->updated_at);
+			$this->setAttribute(self::UPDATED_AT, $content->{self::UPDATED_AT});
 			
 			$this->exists = true;
 					
@@ -425,7 +437,7 @@ abstract class Backenator extends Eloquent {
 		if(!empty($content)){
 					
 			//Force attribute set
-			$this->setAttribute('deleted_at', $content->deleted_at);
+			$this->setAttribute(self::DELETED_AT, $content->{self::DELETED_AT});
 			
 			$this->exists = false;
 		
@@ -488,11 +500,32 @@ abstract class Backenator extends Eloquent {
 	}
 	
 	/**
+	 * Set the base url of each request
+	 *
+	 * @param string $url
+	 */
+	public function setBaseUrl($url)
+	{
+		$this->baseUrl = $url;
+	}
+	
+	/**
+	 * Return the base url
+	 *
+	 * @return string
+	 */
+	public function getBaseUrl()
+	{
+		$this->baseUrl;
+	}
+	
+	/**
 	 * Save the model to the database.
 	 * 
+	 * @param  array  $options
 	 * @return bool
 	 */
-	public function save()
+	public function save(array $options = array())
 	{				
 		//If the primary key attribute is set
 		if ($this->getAttribute($this->primaryKey)) {

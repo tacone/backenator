@@ -175,28 +175,7 @@ class BackenatorTest extends PHPUnit_Framework_TestCase {
 	public function testDeleteFail()
 	{
 		
-	}
-	
-	/*
-	public function testFireErrorsWithHttp401()
-	{
-		//Mock rest client
-		$mock = m::mock('Buzz\Browser');
-		
-		//Mock rest client response
-		$mock_response = m::mock('Buzz\Message\Response');
-		
-		//Response get content
-		$mock_response->shouldReceive('getContent')->twice()->andReturn('{"uri":null,"success":false,"errors":[{"E_GENERIC_INVALID_TOKEN":"You should have a valid token."}]}');	
-		$mock_response->shouldReceive('getStatusCode')->twice()->andReturn(401);	
-		$mock_response->shouldReceive('getHeaders')->once()->andReturn(array('HTTP/1.0 401 Unauthorized'));		
-		
-		//Create the model
-		$classroom = new BackenatorStub(array(), $mock);
-		$classroom->clientErrors($mock_response);
-	}
-	*/
-	
+	}	
 }
 
 class BackenatorStub extends Backenator {
