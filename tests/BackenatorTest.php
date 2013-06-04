@@ -159,22 +159,83 @@ class BackenatorTest extends PHPUnit_Framework_TestCase {
 	
 	public function testPutSuccess()
 	{
+		//Mock rest client
+		$mock = m::mock('Buzz\Browser');
 		
+		//Mock rest client response
+		$mock_response = m::mock('Buzz\Message\Response');
+		
+		//Response get content
+		$mock_response->shouldReceive('getContent')->twice()->andReturn('{"success":true,"id":1,"updated_at":"' . date('Y-m-d H:i:s') . '"}');
+		
+		//Rest client get
+		$mock->shouldReceive('put')->once()->andReturn($mock_response);
+		
+		//Create the model
+		$model = new BackenatorStub(array(), $mock);
+				
+		$this->assertTrue($model->put());
 	}
 	
 	public function testPutFail()
 	{
+		//Mock rest client
+		$mock = m::mock('Buzz\Browser');
 		
+		//Mock rest client response
+		$mock_response = m::mock('Buzz\Message\Response');
+		
+		//Response get content
+		$mock_response->shouldReceive('getContent')->twice()->andReturn('{"success":false}');
+		
+		//Rest client get
+		$mock->shouldReceive('put')->once()->andReturn($mock_response);
+		
+		//Create the model
+		$model = new BackenatorStub(array(), $mock);
+		
+		$this->assertFalse($model->put());
 	}
 	
 	public function testDeleteSuccess()
 	{
+		//Mock rest client
+		$mock = m::mock('Buzz\Browser');
 		
+		//Mock rest client response
+		$mock_response = m::mock('Buzz\Message\Response');
+		
+		//Response get content
+		$mock_response->shouldReceive('getContent')->twice()->andReturn('{"success":true,"deleted_at":"' . date('Y-m-d H:i:s') . '"}');
+		
+		//Rest client get
+		$mock->shouldReceive('delete')->once()->andReturn($mock_response);
+		
+		//Create the model
+		$model = new BackenatorStub(array(), $mock);
+		
+		$this->assertTrue($model->delete());
 	}
 	
 	public function testDeleteFail()
 	{
+
+		//Mock rest client
+		$mock = m::mock('Buzz\Browser');
 		
+		//Mock rest client response
+		$mock_response = m::mock('Buzz\Message\Response');
+		
+		//Response get content
+		$mock_response->shouldReceive('getContent')->twice()->andReturn('{"success":false}');
+		
+		//Rest client get
+		$mock->shouldReceive('delete')->once()->andReturn($mock_response);
+		
+		//Create the model
+		$model = new BackenatorStub(array(), $mock);
+		
+		$this->assertFalse($model->delete());
 	}	
 }
 
