@@ -5,38 +5,15 @@ use EllipseSynergie\Backenator;
 
 
 interface BuilderInterface {
-		
-	/**
-	 * Handle the get method
-	 *
-	 * @param object $content
-	 * @return bool
-	 */
-	public function get($content, \Buzz\Message\Response $response);
 	
 	/**
-	 * Handle the put method
-	 *
+	 * Check if the query is a success
+	 * 
 	 * @param object $content
+	 * @param \Buzz\Message\Response $response
 	 * @return bool
 	 */
-	public function put($content, \Buzz\Message\Response $response);
-	
-	/**
-	 * Handle the post method
-	 *
-	 * @param object $content
-	 * @return bool
-	 */
-	public function post($content, \Buzz\Message\Response $response);
-	
-	/**
-	 * Handle the delete method
-	 *
-	 * @param object $content
-	 * @return bool
-	 */
-	public function delete($content, \Buzz\Message\Response $response);
+	public function success($content, \Buzz\Message\Response $response);
 	
 	/**
 	 * Set a model instance for the model being queried.

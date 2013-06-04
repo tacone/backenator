@@ -230,7 +230,7 @@ abstract class Backenator extends Eloquent {
 		$this->log('GET', $url, $response->getContent());
 		
 		//Handle the get method
-		$result = $this->newQuery()->get($content, $response);
+		$result = $this->newQuery()->success($content, $response);
 		
 		//If we have a result
 		if(!empty($result)){				
@@ -266,7 +266,7 @@ abstract class Backenator extends Eloquent {
 		$this->log('POST', $url, $response->getContent());
 		
 		//Handle the post method
-		$result = $this->newQuery()->post($content, $response);
+		$result = $this->newQuery()->success($content, $response);
 		
 		//If we have a result
 		if(!empty($result)){
@@ -309,7 +309,7 @@ abstract class Backenator extends Eloquent {
 		$this->log('PUT', $url, $response->getContent());
 		
 		//Handle the put method
-		$result = $this->newQuery()->put($content, $response);
+		$result = $this->newQuery()->success($content, $response);
 		
 		//If we have a result
 		if(!empty($result)){
@@ -349,7 +349,7 @@ abstract class Backenator extends Eloquent {
 		$this->log('DELETE', $url, $response->getContent());
 		
 		//Handle the delete method
-		$result = $this->newQuery()->delete($content, $response);
+		$result = $this->newQuery()->success($content, $response);
 		
 		//If we have a result
 		if(!empty($result)){

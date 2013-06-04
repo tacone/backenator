@@ -7,47 +7,9 @@ class Builder implements BuilderInterface {
 	
 	/**
 	 * (non-PHPdoc)
-	 * @see \EllipseSynergie\Backenator\BuilderInterface::get()
+	 * @see \EllipseSynergie\Backenator\BuilderInterface::success()
 	 */
-	public function get($content, \Buzz\Message\Response $response)
-	{
-		return $this->isSuccess($content);
-	}
-	
-	/**
-	 * (non-PHPdoc)
-	 * @see \EllipseSynergie\Backenator\BuilderInterface::post()
-	 */
-	public function post($content, \Buzz\Message\Response $response)
-	{	
-		return $this->isSuccess($content);
-	}
-
-	/**
-	 * (non-PHPdoc)
-	 * @see \EllipseSynergie\Backenator\BuilderInterface::put()
-	 */
-	public function put($content, \Buzz\Message\Response $response)
-	{
-		return $this->isSuccess($content);
-	}
-
-	/**
-	 * (non-PHPdoc)
-	 * @see \EllipseSynergie\Backenator\BuilderInterface::delete()
-	 */
-	public function delete($content, \Buzz\Message\Response $response)
-	{
-		return $this->isSuccess($content);
-	}
-	
-	/**
-	 * Check if the query is a success
-	 * 
-	 * @param object $content
-	 * @return bool
-	 */
-	protected function isSuccess($content)
+	public function success($content, \Buzz\Message\Response $response)
 	{
 		//If the request is a succes
 		if(!empty($content->success)){
