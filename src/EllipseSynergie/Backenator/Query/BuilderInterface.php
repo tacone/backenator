@@ -9,11 +9,10 @@ interface BuilderInterface {
 	/**
 	 * Check if request has success
 	 *
-	 * @param object $content
 	 * @param \Buzz\Message\Response $response
 	 * @return boolean
 	 */
-	public function success($content, \Buzz\Message\Response $response);
+	public function success(\Buzz\Message\Response $response);
 	
 	/**
 	 * Build the request results

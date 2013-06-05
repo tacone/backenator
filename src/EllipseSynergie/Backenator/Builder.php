@@ -42,6 +42,7 @@ class Builder {
 	{
 		$result = $this->query->get();
 		$this->setResponse($this->query->getResponse());
+		$this->errors = $this->query->errors();
 		
 		return $result;
 	}
@@ -56,21 +57,7 @@ class Builder {
 	{
 		$result = $this->query->post($values);
 		$this->setResponse($this->query->getResponse());
-		
-		return $result;
-	}
-	
-	/**
-	 * Insert a new record and get the value of the primary key.
-	 *
-	 * @param  array   $values
-	 * @param  string  $sequence
-	 * @return int
-	 */
-	public function insertGetId(array $values, $sequence = null)
-	{
-		$result = $this->query->post($values);
-		$this->setResponse($this->query->getResponse());
+		$this->errors = $this->query->errors();
 		
 		return $result;
 	}
@@ -85,6 +72,7 @@ class Builder {
 	{
 		$result = $this->query->put($values);
 		$this->setResponse($this->query->getResponse());
+		$this->errors = $this->query->errors();
 		
 		return $result;
 	}
@@ -98,6 +86,7 @@ class Builder {
 	{
 		$result = $this->query->delete();
 		$this->setResponse($this->query->getResponse());
+		$this->errors = $this->query->errors();
 		
 		return $result;
 	}
@@ -120,5 +109,15 @@ class Builder {
 	public function getResponse()
 	{
 		return $this->response;
+	}
+	
+	/**
+	 * Get errors
+	 *
+	 * @return MessageBag
+	 */
+	public function errors()
+	{
+		return $this->errors;
 	}
 }

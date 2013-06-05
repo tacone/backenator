@@ -2,6 +2,7 @@
 namespace EllipseSynergie\Backenator\Query;
 
 use EllipseSynergie\Backenator;
+use Illuminate\Support\MessageBag;
 
 /**
  * Query builder class
@@ -38,6 +39,7 @@ abstract class Builder implements BuilderInterface {
 	public function __construct(Backenator $model)
 	{
 		$this->model = $model;
+		$this->errors = new MessageBag;
 	}
 	
 	/**
@@ -56,8 +58,11 @@ abstract class Builder implements BuilderInterface {
 		//Convert response to json
 		$content = json_decode($response->getContent());
 		
+		//Log the request
+		$this->log('GET', $url, $response->getContent());
+		
 		//Handle the get method
-		$result = $this->success($content, $response);
+		$result = $this->success($response);
 		
 		//If we have a result
 		if(!empty($result)){				
@@ -89,8 +94,11 @@ abstract class Builder implements BuilderInterface {
 		//Convert response to json
 		$content = json_decode($response->getContent());
 		
+		//Log the request
+		$this->log('POST', $url, $response->getContent());
+		
 		//Handle the post method
-		$result = $this->success($content, $response);
+		$result = $this->success($response);
 		
 		//Set the request response
 		$this->setResponse($response);
@@ -117,8 +125,11 @@ abstract class Builder implements BuilderInterface {
 		//Convert response to json
 		$content = json_decode($response->getContent());
 		
+		//Log the request
+		$this->log('PUT', $url, $response->getContent());
+		
 		//Handle the put method
-		$result = $this->success($content, $response);
+		$result = $this->success($response);
 		
 		//Set the request response
 		$this->setResponse($response);
@@ -142,8 +153,11 @@ abstract class Builder implements BuilderInterface {
 		//Convert response to json
 		$content = json_decode($response->getContent());
 		
+		//Log the request
+		$this->log('DELETE', $url, $response->getContent());
+		
 		//Handle the delete method
-		$result = $this->success($content, $response);
+		$result = $this->success($response);
 		
 		//Set the request response
 		$this->setResponse($response);	
@@ -192,9 +206,11 @@ abstract class Builder implements BuilderInterface {
 				$uri .= $segment . '/';
 			}
 		}
-	
-		//Return the uri and remove the latest trailing slash
-		return substr($uri, 0, -1);
+		
+		//Remove the latest trailing slash
+		$uri = substr($uri, 0, -1);
+		
+		return $uri;
 	}	
 	
 	/**
@@ -228,5 +244,25 @@ abstract class Builder implements BuilderInterface {
 	public function getResponse()
 	{
 		return $this->response;
+	}
+	
+	/**
+	 * Log the request
+	 * 
+	 * @param string $method
+	 * @param string $url
+	 * @param mixed $result
+	 */
+	public function log($method, $url, $result)
+	{
+		// Log...
+		if (\Config::get("app.backend.logging") == true) {
+			\File::append(storage_path() . '/logs/backend-'.date('Y-m-d').'.log', date('Y-m-d H:i:s').' - ' . $method . ' ' . $url . print_r($result, true) . PHP_EOL);
+		}
+	} // log()
+	
+	public function errors()
+	{
+		return $this->errors;
 	}
 }

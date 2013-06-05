@@ -14,14 +14,24 @@ class BaseBuilder extends Builder {
 	 * @param \Buzz\Message\Response $response
 	 * @return boolean
 	 */
-	public function success($content, \Buzz\Message\Response $response)
-	{
-		//If the request is a succes
-		if(!empty($content->success)){
-			return true;
+	public function success(\Buzz\Message\Response $response)
+	{		
+		$content = json_decode($response->getContent());
+		
+		//Check the status code from the request
+		if(!$response->isSuccessful())
+		{
+			$this->errors->add('REQUEST_FAILED', 'Status code : ' . $response->getStatusCode() );
+			
+			//If we have errors
+			if (!empty($content->errors)) {
+				$this->errors->add('API', $content->errors);
+			}
+			
+			return false;		
 		}
 	
-		return false;
+		return true;
 	}
 	
 	/**

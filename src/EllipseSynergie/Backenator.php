@@ -60,11 +60,11 @@ abstract class Backenator extends Eloquent {
 		//Fill attributes
 		$this->fill($attributes, true);
 		
+		//Set the default base url
+		$this->setBaseUrl(\Config::get('backenator::baseUrl'));
+		
 		//Factory the client
-		$this->clientFactory($client);		
-
-		//Create errors message bag
-		$this->errors = new MessageBag;
+		$this->clientFactory($client);
 	}
 	
 	/**
@@ -98,6 +98,7 @@ abstract class Backenator extends Eloquent {
 		$query = $this->newQuery();
 		$result = $query->get();
 		$this->setResponse($query->getResponse());
+		$this->errors = $query->errors();
 	
 		return $result;
 	}
@@ -161,10 +162,19 @@ abstract class Backenator extends Eloquent {
 	 * @param string $segment
 	 * @return Backenator
 	 */
-	public function segment($segment)
+	public function segment($segment, $first = false)
 	{
-		//Encode and push a new segment into the array
-		$this->segments[] = urlencode($segment);
+		//Encode the segment
+		$segment = urlencode($segment);
+		
+		//If we want to add the segment at the begin
+		if($first == true){
+			array_unshift($this->segments, $segment);
+			
+		//Else we want to add the segment at the end
+		} else {		
+			array_push($this->segments, $segment);		
+		}		
 	
 		return $this;	
 	}
@@ -187,8 +197,12 @@ abstract class Backenator extends Eloquent {
 	 */
 	public function newQuery($excludeDeleted = true)
 	{		
+		
+		//Builder classnam
+		$builderName = \Config::get('backenator::queryBuilder');
+		
 		//Create query build
-		$queryBuilder = new Backenator\Query\BaseBuilder($this);
+		$queryBuilder = new $builderName($this);
 		$builder = new Backenator\Builder($queryBuilder);
 		
 		// Once we have the query builders, we will set the model instances so the
@@ -197,6 +211,125 @@ abstract class Backenator extends Eloquent {
 		$builder->setModel($this);
 	
 		return $builder;
+	}
+	
+
+
+	/**
+	 * Perform a model update operation.
+	 *
+	 * @param  \Illuminate\Database\Eloquent\Builder
+	 * @return bool
+	 */
+	protected function performUpdate($query)
+	{
+		$dirty = $this->getDirty();
+	
+		if (count($dirty) > 0)
+		{
+			// If the updating event returns false, we will cancel the update operation so
+			// developers can hook Validation systems into their models and cancel this
+			// operation if the model does not pass validation. Otherwise, we update.
+			if ($this->fireModelEvent('updating') === false)
+			{
+				return false;
+			}
+	
+			// First we need to create a fresh query instance and touch the creation and
+			// update timestamp on the model which are maintained by us for developer
+			// convenience. Then we will just continue saving the model instances.
+			if ($this->timestamps)
+			{
+				$this->updateTimestamps();
+	
+				$dirty = $this->getDirty();
+			}
+	
+				
+			//If we want to add automaticly the id to the request where updating
+			if(\Config::get('backenator::autoId') == true){
+	
+				//Get the current id
+				$id = $this->{$this->primaryKey};
+					
+				$this->segment($id, true);
+			}
+				
+			$query->update($dirty);
+			$this->setResponse($query->getResponse());
+			$this->errors = $query->errors();
+	
+			// Once we have run the update operation, we will fire the "updated" event for
+			// this model instance. This will allow developers to hook into these after
+			// models are updated, giving them a chance to do any special processing.
+			$this->fireModelEvent('updated', false);
+		}
+	
+		return true;
+	}
+	
+	/**
+	 * Perform a model insert operation.
+	 *
+	 * @param  \Illuminate\Database\Eloquent\Builder
+	 * @return bool
+	 */
+	protected function performInsert($query)
+	{
+		if ($this->fireModelEvent('creating') === false) return false;
+	
+		// First we'll need to create a fresh query instance and touch the creation and
+		// update timestamps on this model, which are maintained by us for developer
+		// convenience. After, we will just continue saving these model instances.
+		if ($this->timestamps)
+		{
+			$this->updateTimestamps();
+		}
+	
+		// Do the query
+		$query->insert($this->attributes);
+		$this->setResponse($query->getResponse());
+		$this->errors = $query->errors();
+	
+		// We will go ahead and set the exists property to true, so that it is set when
+		// the created event is fired, just in case the developer tries to update it
+		// during the event. This will allow them to do so and run an update here.
+		$this->exists = true;
+	
+		$this->fireModelEvent('created', false);
+	
+		return true;
+	}
+	
+	/**
+	 * Perform the actual delete query on this model instance.
+	 *
+	 * @return void
+	 */
+	protected function performDeleteOnModel()
+	{
+		$query = $this->newQuery();
+	
+		//If we want to add automaticly the id to the request where updating
+		if(\Config::get('backenator::autoId') == true){
+	
+			//Get the current id
+			$id = $this->{$this->primaryKey};
+	
+			$this->segment($id, true);
+		}
+	
+		if ($this->softDelete)
+		{
+			$query->update(array(static::DELETED_AT => new DateTime));
+		}
+		else
+		{
+			$query->delete();
+		}
+	
+		$this->setResponse($query->getResponse());
+		$this->errors = $query->errors();
 	}
 
 	/**
@@ -276,7 +409,7 @@ abstract class Backenator extends Eloquent {
 	 */
 	public function success()
 	{
-		return (count($this->errors) == 0 ? true : false);	
+		return $this->fail()? false : true;	
 	}
 	
 	/**
@@ -284,9 +417,9 @@ abstract class Backenator extends Eloquent {
 	 *
 	 * @return bool
 	 */
-	public function fail($errorName)
+	public function fail()
 	{
-		return $this->success()? false : true;	
+		return $this->errors()->any();	
 	}
 	
 	/**
@@ -297,5 +430,13 @@ abstract class Backenator extends Eloquent {
 	public function errors()
 	{
 		return $this->errors;
+	}
+	
+	/**
+	 * Helper to return rapidly the current request URL
+	 */
+	public function getRequestUrl()
+	{
+		return $this->getClient()->getLastRequest()->getUrl();
 	}
 }
