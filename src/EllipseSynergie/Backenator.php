@@ -87,6 +87,42 @@ abstract class Backenator extends Eloquent {
 			$this->client = new Client(new CurlClientInterface());
 		}		
 	}
+
+	/**
+	 * Retrieve elements
+	 * 
+	 * @return Backenator|array
+	 */
+	public function get()
+	{
+		$query = $this->newQuery();
+		$result = $query->get();
+		$this->setResponse($query->getResponse());
+	
+		return $result;
+	}
+	
+	/**
+	 * Retrieve the first element
+	 *
+	 * @return Backenator|bool
+	 */
+	public function first()
+	{
+		//Get elements
+		$result = $this->get();
+	
+		//If we have multiple result
+		if(is_array($result)){
+	
+			//Get the first array element
+			reset($result);
+			return current($result);
+		}
+	
+		return $result;
+	}
+	
 	
 	/**
 	 * Find a model by its primary key.
@@ -98,7 +134,7 @@ abstract class Backenator extends Eloquent {
 	public static function find($id, $columns = array())
 	{	
 		//Create the new instance
-		$instance = $this->newInstance(array(), true);
+		$instance = static::newInstance(array(), true);
 		$instance->segment($id);
 	
 		return $instance->first();	
@@ -134,237 +170,13 @@ abstract class Backenator extends Eloquent {
 	}
 	
 	/**
-	 * Build the request URL
-	 * 
-	 * @return string
-	 */
-	public function url()
-	{		
-		//Build the url
-		$url = $this->getBaseUrl() . $this->uri(); 
-		
-		//If we have parameters
-		if(!empty($this->params)){
-		
-			//Add query string parameters to the URL
-			$url .= '?' . http_build_query($this->params);
-			
-		}
-		
-		return $url;		
-	}
-	
-	/**
-	 * Build the uri string
-	 *
-	 * @return string
-	 */
-	public function uri()
-	{
-		//Create the base URI
-		$uri = $this->table . '/';
-	
-		//If we have segment to add
-		if(!empty($this->segments))
-		{
-			//for each segment to add
-			foreach ($this->segments as $segment)
-			{
-				//Add the segment to the final URI
-				$uri .= $segment . '/';
-			}
-		}
-	
-		//Return the uri and remove the latest trailing slash
-		return substr($uri, 0, -1);
-	}
-	
-	/**
 	 * Get the client object
 	 * 
 	 * @return \Buzz\Browser
 	 */
-	public function client()
+	public function getClient()
 	{
 		return $this->client;		
-	}
-	
-	/**
-	 * Retrieve the first element
-	 *
-	 * @return Backenator|bool
-	 */
-	public function first()
-	{		
-		//Get elements
-		$result = $this->get();
-		
-		//If we have multiple result
-		if(is_array($result)){	
-
-			//Get the first array element
-			reset($result);
-			return current($result);
-		}
-		
-		return $result;
-	}
-	
-	/**
-	 * Request GET on backend
-	 *
-	 * @return Backenator|array
-	 */
-	public function get()
-	{								
-		//Build the url
-		$url = $this->url();
-		
-		//Do the get resquest to the Backend
-		$response = $this->client()->get($url);
-		
-		//Convert response to json
-		$content = json_decode($response->getContent());
-		
-		//Log the request
-		$this->log('GET', $url, $response->getContent());
-		
-		//Handle the get method
-		$result = $this->newQuery()->success($content, $response);
-		
-		//If we have a result
-		if(!empty($result)){				
-			$result = $this->newQuery()->buildResults($content);
-		}
-		
-		//Set the request response
-		$this->setResponse($response);
-		
-		return $result;		
-	}
-	
-	/**
-	 * Request POST on backend
-	 * 
-	 * @return bool
-	 */
-	public function post()
-	{				
-		//Build the url
-		$url = $this->url();
-		
-		//Build data query
-		$data = http_build_query($this->attributes);
-		
-		//Do the get resquest to the Backend
-		$response = $this->client()->post($url, array(), $data);
-		
-		//Convert response to json
-		$content = json_decode($response->getContent());
-		
-		//Log the request
-		$this->log('POST', $url, $response->getContent());
-		
-		//Handle the post method
-		$result = $this->newQuery()->success($content, $response);
-		
-		//If we have a result
-		if(!empty($result)){
-		
-			//Force attribute set
-			$this->setAttribute($this->primaryKey, $content->{$this->primaryKey});
-			$this->setAttribute(self::CREATED_AT, $content->{self::CREATED_AT});
-			
-			$this->exists = true;
-		}
-		
-		//Set the request response
-		$this->setResponse($response);
-		
-		return $result;		
-	}
-	
-	
-	
-	/**
-	 * Request PUT on backend
-	 *
-	 * @return bool;
-	 */
-	public function put()
-	{		
-		//Build the url
-		$url = $this->url();
-		
-		//Build data query
-		$data = http_build_query($this->attributes);
-		
-		//Do the get resquest to the Backend
-		$response = $this->client()->put($url, array(), $data);
-		
-		//Convert response to json
-		$content = json_decode($response->getContent());
-		
-		//Log the request
-		$this->log('PUT', $url, $response->getContent());
-		
-		//Handle the put method
-		$result = $this->newQuery()->success($content, $response);
-		
-		//If we have a result
-		if(!empty($result)){
-		
-			//Force attribute set
-			$this->setAttribute(self::UPDATED_AT, $content->{self::UPDATED_AT});
-			
-			$this->exists = true;
-		}
-		
-		//Set the request response
-		$this->setResponse($response);
-		
-		return $result;		
-	}
-	
-	/**
-	 * Request DELETE on backend
-	 *
-	 * @return bool;
-	 */
-	public function delete()
-	{				
-		//Add the find id
-		$this->segment($this->id);
-		
-		//Build the url
-		$url = $this->url();
-		
-		//Do the get resquest to the Backend
-		$response = $this->client()->delete($url, array());
-
-		//Convert response to json
-		$content = json_decode($response->getContent());
-		
-		//Log the request
-		$this->log('DELETE', $url, $response->getContent());
-		
-		//Handle the delete method
-		$result = $this->newQuery()->success($content, $response);
-		
-		//If we have a result
-		if(!empty($result)){
-			
-			//Force attribute set
-			$this->setAttribute(self::DELETED_AT, $content->{self::DELETED_AT});
-			
-			$this->exists = false;
-		}
-		
-		//Set the request response
-		$this->setResponse($response);
-		
-		return $result;
-		
 	}
 	
 	/**
@@ -374,8 +186,10 @@ abstract class Backenator extends Eloquent {
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
 	public function newQuery($excludeDeleted = true)
-	{
-		$builder = new Backenator\Builder;
+	{		
+		//Create query build
+		$queryBuilder = new Backenator\Query\BaseBuilder($this);
+		$builder = new Backenator\Builder($queryBuilder);
 		
 		// Once we have the query builders, we will set the model instances so the
 		// builder can easily access any information it may need from the model
@@ -384,59 +198,7 @@ abstract class Backenator extends Eloquent {
 	
 		return $builder;
 	}
-	
-	/**
-	 * Log the request
-	 * 
-	 * @param string $method
-	 * @param string $url
-	 * @param mixed $result
-	 */
-	public function log($method, $url, $result)
-	{
-	}
-	
-	/**
-	 * Check if request has succeed
-	 *
-	 * @return bool
-	 */
-	public function success()
-	{
-		return (count($this->errors) == 0 ? true : false);
-	
-	}
-	
-	/**
-	 * Check if request has fail
-	 *
-	 * @return bool
-	 */
-	public function fail($errorName)
-	{
-		return $this->success()? false : true;	
-	}	
-	
-	/**
-	 * Set the response
-	 * 
-	 * @param \Buzz\Message\Response $response
-	 */
-	public function setResponse(\Buzz\Message\Response $response)
-	{		
-		$this->response = $response;
-	}
-	
-	/**
-	 * Return the response object
-	 *
-	 * @return \Buzz\Message\Response|null
-	 */
-	public function getResponse()
-	{
-		$this->response;		
-	}
-	
+
 	/**
 	 * Set the base url of each request
 	 *
@@ -454,39 +216,7 @@ abstract class Backenator extends Eloquent {
 	 */
 	public function getBaseUrl()
 	{
-		$this->baseUrl;
-	}
-	
-	/**
-	 * Save the model to the database.
-	 * 
-	 * @param  array  $options
-	 * @return bool
-	 */
-	public function save(array $options = array())
-	{				
-		//If the primary key attribute is set
-		if ($this->getAttribute($this->primaryKey)) {
-			
-			//Update the element
-			return $this->put();	
-
-		//Else create a new model
-		} else {
-			
-			//Create a new element
-			return $this->post();
-		}		
-	}
-	
-	/**
-	 * Get errors
-	 * 
-	 * @return MessageBag
-	 */
-	public function errors()
-	{
-		return $this->errors;			
+		return $this->baseUrl;
 	}
 	
 	/**
@@ -499,4 +229,73 @@ abstract class Backenator extends Eloquent {
 		return 'Y-m-d H:i:s';
 	}
 
+	/**
+	 * Set the response
+	 *
+	 * @param \Buzz\Message\Response $response
+	 */
+	public function setResponse(\Buzz\Message\Response $response)
+	{
+		$this->response = $response;
+	}
+	
+	/**
+	 * Return the response object
+	 *
+	 * @return \Buzz\Message\Response|null
+	 */
+	public function getResponse()
+	{
+		return $this->response;
+	}
+	
+	/**
+	 * Get segment
+	 *
+	 * @return array
+	 */
+	public function getSegments()
+	{
+		return $this->segments;
+	}
+	
+	/**
+	 * Get parameters
+	 *
+	 * @return array
+	 */
+	public function getParams()
+	{
+		return $this->params;
+	}
+	
+	/**
+	 * Check if request has succeed
+	 *
+	 * @return bool
+	 */
+	public function success()
+	{
+		return (count($this->errors) == 0 ? true : false);	
+	}
+	
+	/**
+	 * Check if request has fail
+	 *
+	 * @return bool
+	 */
+	public function fail($errorName)
+	{
+		return $this->success()? false : true;	
+	}
+	
+	/**
+	 * Get errors
+	 *
+	 * @return MessageBag
+	 */
+	public function errors()
+	{
+		return $this->errors;
+	}
 }

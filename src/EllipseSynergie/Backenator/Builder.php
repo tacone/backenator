@@ -2,76 +2,123 @@
 namespace EllipseSynergie\Backenator;
 
 use EllipseSynergie\Backenator;
+use EllipseSynergie\Backenator\Query\Builder as QueryBuilder;
 
-class Builder implements BuilderInterface {
+/**
+ * Builder use by Backenator
+ */
+class Builder {
 	
 	/**
-	 * (non-PHPdoc)
-	 * @see \EllipseSynergie\Backenator\BuilderInterface::success()
+	 * Create a new Eloquent query builder instance.
+	 *
+	 * @param  \Illuminate\Database\Query\Builder  $query
+	 * @return void
 	 */
-	public function success($content, \Buzz\Message\Response $response)
+	public function __construct(QueryBuilder $query)
 	{
-		//If the request is a succes
-		if(!empty($content->success)){
-			return true;
-		}
-		
-		return false;
+		$this->query = $query;
 	}
 	
-	/**
-	 * (non-PHPdoc)
-	 * @see \EllipseSynergie\Backenator\BuilderInterface::setModel()
+/**
+	 * Set a model instance for the model being queried.
+	 *
+	 * @param  \EllipseSynergie\Backenator  $model
+	 * @return \EllipseSynergie\Backenator\Builder
 	 */
 	public function setModel(Backenator $model)
 	{
 		$this->model = $model;
+
+		$this->query->from($model->getTable());
+
 		return $this;
 	}
 	
 	/**
-	 * (non-PHPdoc)
-	 * @see \EllipseSynergie\Backenator\BuilderInterface::buildResults()
+	 * Get request
 	 */
-	public function buildResults($content)
+	public function get()
 	{
-		//Default
-		$results = array();
+		$result = $this->query->get();
+		$this->setResponse($this->query->getResponse());
+		
+		return $result;
+	}
 	
-		//If we have content
-		if (!empty($content->results)) {
+	/**
+	 * Insert a reccord
+	 * 
+	 * @param array $values
+	 * @return int
+	 */
+	public function insert(array $values)
+	{
+		$result = $this->query->post($values);
+		$this->setResponse($this->query->getResponse());
+		
+		return $result;
+	}
 	
-			//For each data result
-			foreach ($content->results as $result) {
-					
-				//Create a new modal object
-				$object = $this->model->newInstance(array(), true);
+	/**
+	 * Insert a new record and get the value of the primary key.
+	 *
+	 * @param  array   $values
+	 * @param  string  $sequence
+	 * @return int
+	 */
+	public function insertGetId(array $values, $sequence = null)
+	{
+		$result = $this->query->post($values);
+		$this->setResponse($this->query->getResponse());
+		
+		return $result;
+	}
 	
-				//For each result data
-				foreach ($result as $datak => $datav) {
+	/**
+	 * Update a record in the database.
+	 *
+	 * @param  array  $values
+	 * @return int
+	 */
+	public function update(array $values)
+	{
+		$result = $this->query->put($values);
+		$this->setResponse($this->query->getResponse());
+		
+		return $result;
+	}
 	
-					//Force attribute set
-					$object->setAttribute($datak, $datav);
-				}
-					
-				//Push the object in the results
-				array_push($results, $object);
-			}
+	/**
+	 * Delete a record from the database.
+	 *
+	 * @return int
+	 */
+	public function delete()
+	{
+		$result = $this->query->delete();
+		$this->setResponse($this->query->getResponse());
+		
+		return $result;
+	}
+
+	/**
+	 * Set the response
+	 *
+	 * @param \Buzz\Message\Response $response
+	 */
+	public function setResponse(\Buzz\Message\Response $response)
+	{
+		$this->response = $response;
+	}
 	
-			// Set results count
-			if (!empty($content->count)) {
-				$this->setPerPage($content->count);
-			}
-	
-			//If we only have one result
-			if(count($results) === 1){
-				return $results[0];
-			}
-	
-			//Return the results
-			return $results;
-		}
-			
-		return false;
+	/**
+	 * Return the response object
+	 *
+	 * @return \Buzz\Message\Response|null
+	 */
+	public function getResponse()
+	{
+		return $this->response;
 	}
 }
