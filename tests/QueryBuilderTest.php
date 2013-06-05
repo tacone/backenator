@@ -45,7 +45,8 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testGetSucces()
 	{		
 		//Create the model
-		$model = new BackenatorStub(array(), $this->mockSuccess('get'));
+		$model = new BackenatorStub;
+		$model->setClient($this->mockSuccess('get'));
 		
 		$queryBuilder = new Backenator\Query\BaseBuilder($model);
 		$result = $queryBuilder->get();
@@ -56,7 +57,8 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testPostSucces()
 	{		
 		//Create the model
-		$model = new BackenatorStub(array(), $this->mockSuccess('post'));
+		$model = new BackenatorStub;
+		$model->setClient($this->mockSuccess('post'));
 		
 		$queryBuilder = new Backenator\Query\BaseBuilder($model);
 		$result = $queryBuilder->post(array());
@@ -67,7 +69,8 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testPutSucces()
 	{		
 		//Create the model
-		$model = new BackenatorStub(array(), $this->mockSuccess('put'));
+		$model = new BackenatorStub;
+		$model->setClient($this->mockSuccess('put'));
 		
 		$queryBuilder = new Backenator\Query\BaseBuilder($model);
 		$result = $queryBuilder->put(array());
@@ -78,7 +81,8 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testDeleteSucces()
 	{		
 		//Create the model
-		$model = new BackenatorStub(array(), $this->mockSuccess('delete'));
+		$model = new BackenatorStub;
+		$model->setClient($this->mockSuccess('delete'));
 		
 		$queryBuilder = new Backenator\Query\BaseBuilder($model);
 		$result = $queryBuilder->delete();

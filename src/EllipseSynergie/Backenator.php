@@ -55,7 +55,7 @@ abstract class Backenator extends Eloquent {
 	 * @param array $attributes
 	 * @param Buzz\Browser $client
 	 */
-	public function __construct(array $attributes = array(), \Buzz\Browser $client = null)
+	public function __construct(array $attributes = array())
 	{
 		//Fill attributes
 		$this->fill($attributes, true);
@@ -64,28 +64,7 @@ abstract class Backenator extends Eloquent {
 		$this->setBaseUrl(\Config::get('backenator::baseUrl'));
 		
 		//Factory the client
-		$this->clientFactory($client);
-	}
-	
-	/**
-	 * Create the new client use for the request
-	 * 
-	 * @param Buzz\Browser $client
-	 */
-	public function clientFactory(\Buzz\Browser $client = null)
-	{
-		//If we have a custom client
-		if (!empty($client)) {
-			
-			//Set the client
-			$this->client = $client;
-			
-		//Else, build a new one we a default Buzz\Browser object
-		} else {
-			
-			//Create the Rest Client
-			$this->client = new Client(new CurlClientInterface());
-		}		
+		$this->client = new Client(new CurlClientInterface());	
 	}
 
 	/**
@@ -177,6 +156,16 @@ abstract class Backenator extends Eloquent {
 		}		
 	
 		return $this;	
+	}
+	
+	/**
+	 * Set the client
+	 * 
+	 * @return \Buzz\Browser
+	 */
+	public function setClient(\Buzz\Browser $client)
+	{
+		$this->client = $client;		
 	}
 	
 	/**

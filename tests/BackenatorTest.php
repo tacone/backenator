@@ -23,7 +23,7 @@ class BackenatorTest extends PHPUnit_Framework_TestCase {
 	public function testClientFactory()
 	{
 		$model = new BackenatorStub;
-		$model->clientFactory(m::mock('Buzz\Browser'));
+		$model->setClient(m::mock('Buzz\Browser'));
 		
 		$this->assertInstanceOf('Buzz\Browser', $model->getClient());
 	}
@@ -31,7 +31,7 @@ class BackenatorTest extends PHPUnit_Framework_TestCase {
 	public function testGet()
 	{
 		$model = new BackenatorStub;
-		$model->clientFactory($this->mockSuccess('get'));
+		$model->setClient($this->mockSuccess('get'));
 		
 		$this->assertInstanceOf('EllipseSynergie\Backenator', $model->get());
 	}
@@ -39,7 +39,7 @@ class BackenatorTest extends PHPUnit_Framework_TestCase {
 	public function testFirst()
 	{			
 		$model = new BackenatorStub;
-		$model->clientFactory($this->mockSuccess('get'));
+		$model->setClient($this->mockSuccess('get'));
 		
 		$this->assertInstanceOf('EllipseSynergie\Backenator', $model->first());
 	}
@@ -48,7 +48,7 @@ class BackenatorTest extends PHPUnit_Framework_TestCase {
 	public function testFind()
 	{
 		$model = new BackenatorStub;
-		$model->clientFactory($this->mockSuccess('get'));
+		$model->setClient($this->mockSuccess('get'));
 	
 		$this->assertInstanceOf('EllipseSynergie\Backenator', $model->find(1));
 	}*/
