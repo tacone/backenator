@@ -30,7 +30,10 @@
     "autoload": {
         "psr-0": {
             "EllipseSynergie": "src/"
-        }
+        },
+        "classmap": [
+			"tests/ConfigStubTest.php"
+		]
     },
     "minimum-stability": "dev"
 }

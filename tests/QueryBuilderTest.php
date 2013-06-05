@@ -89,21 +89,27 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testHasSuccees()
 	{
 		//Default object
-		$content = new stdClass;
-		$content->success = true;
 		$queryBuilder = new Backenator\Query\BaseBuilder(new BackenatorStub);
 		
-		$this->assertTrue($queryBuilder->success($content, m::mock('Buzz\Message\Response')));
+		//Response get content
+		$mock_response = m::mock('Buzz\Message\Response');
+		$mock_response->shouldReceive('getContent')->once()->andReturn('{"success":true, "results":[{"name":"foo"}]}');
+		$mock_response->shouldReceive('isSuccessful')->once()->andReturn(true);
+		
+		$this->assertTrue($queryBuilder->success($mock_response));
 	}
 	
 	public function testHasFail()
 	{
 		//Default object
-		$content = new stdClass;
-		$content->success = false;
 		$queryBuilder = new Backenator\Query\BaseBuilder(new BackenatorStub);
 		
-		$this->assertFalse($queryBuilder->success($content, m::mock('Buzz\Message\Response')));
+		//Response get content
+		$mock_response = m::mock('Buzz\Message\Response');
+		$mock_response->shouldReceive('getContent')->once()->andReturn('{"success":true, "results":[{"name":"foo"}]}');
+		$mock_response->shouldReceive('isSuccessful')->once()->andReturn(true);
+		
+		$this->assertTrue($queryBuilder->success($mock_response));
 	}
 	
 	/**
@@ -121,7 +127,8 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$mock_response = m::mock('Buzz\Message\Response');
 		
 		//Response get content
-		$mock_response->shouldReceive('getContent')->once()->andReturn('{"success":true, "results":[{"name":"foo"}]}');
+		$mock_response->shouldReceive('getContent')->times(3)->andReturn('{"success":true, "results":[{"name":"foo"}]}');
+		$mock_response->shouldReceive('isSuccessful')->once()->andReturn(true);
 		
 		//Rest client get
 		$mock->shouldReceive($method)->once()->andReturn($mock_response);

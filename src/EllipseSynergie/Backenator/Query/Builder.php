@@ -256,7 +256,7 @@ abstract class Builder implements BuilderInterface {
 	public function log($method, $url, $result)
 	{
 		// Log...
-		if (\Config::get("app.backend.logging") == true) {
+		if (\Config::get('backenator::log') == true) {
 			\File::append(storage_path() . '/logs/backend-'.date('Y-m-d').'.log', date('Y-m-d H:i:s').' - ' . $method . ' ' . $url . print_r($result, true) . PHP_EOL);
 		}
 	} // log()

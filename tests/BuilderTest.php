@@ -48,13 +48,6 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 		$this->assertTrue($builder->insert(array()));
 	}
 	
-	public function testInsertGetId()
-	{
-		$builder = new Builder($this->mockBuilder('post'));
-		
-		$this->assertTrue($builder->insertGetId(array()));
-	}
-	
 	public function testUpdate()
 	{
 		$builder = new Builder($this->mockBuilder('put'));
@@ -73,6 +66,7 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 	{
 		$mock = m::mock('EllipseSynergie\Backenator\Query\Builder');
 		$mock->shouldReceive($method)->once()->andReturn(true);
+		$mock->shouldReceive('errors')->once()->andReturn(true);
 		$mock->shouldReceive('getResponse')->once()->andReturn(m::mock('Buzz\Message\Response'));
 		
 		return $mock;
