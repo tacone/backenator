@@ -53,12 +53,11 @@ abstract class Backenator extends Eloquent {
 	 * Constructor
 	 * 
 	 * @param array $attributes
-	 * @param Buzz\Browser $client
 	 */
 	public function __construct(array $attributes = array())
 	{
-		//Fill attributes
-		$this->fill($attributes, true);
+		//Parent constructor
+		parent::__construct($attributes);
 		
 		//Set the default base url
 		$this->setBaseUrl(\Config::get('backenator::baseUrl'));
@@ -117,10 +116,29 @@ abstract class Backenator extends Eloquent {
 	public static function find($id, $columns = array())
 	{	
 		//Create the new instance
-		$instance = static::newInstance(array(), true);
-		$instance->segment($id);
+		$instance = new static(array(), true);
+		$instance->{$instance->primaryKey} = $id;
+		
+		$instance->addEntryKey();
 	
-		return $instance->first();	
+		return $instance->get();	
+	}
+	
+	/**
+	 * Destroy the models for the given IDs.
+	 *
+	 * @param  array|int  $ids
+	 * @return void
+	 */
+	public static function destroy($ids)
+	{
+		//Create the new instance
+		$instance = new static(array(), true);
+		$instance->{$instance->primaryKey} = $ids;
+		
+		$instance->addEntryKey();
+	
+		return $instance->delete();
 	}
 	
 	/**
