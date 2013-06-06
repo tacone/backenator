@@ -65,6 +65,9 @@ abstract class Backenator extends Eloquent {
 		
 		//Factory the client
 		$this->client = new Client(new CurlClientInterface());	
+		
+		//Create default error messageb bag
+		$this->errors = new MessageBag;
 	}
 
 	/**
@@ -235,14 +238,8 @@ abstract class Backenator extends Eloquent {
 			}
 	
 				
-			//If we want to add automaticly the id to the request where updating
-			if(\Config::get('backenator::autoId') == true){
-	
-				//Get the current id
-				$id = $this->{$this->primaryKey};
-					
-				$this->segment($id, true);
-			}
+			//Add the id of the entry in the request
+			$this->addEntryKey();
 				
 			$query->update($dirty);
 			$this->setResponse($query->getResponse());
@@ -299,14 +296,8 @@ abstract class Backenator extends Eloquent {
 	{
 		$query = $this->newQuery();
 	
-		//If we want to add automaticly the id to the request where updating
-		if(\Config::get('backenator::autoId') == true){
-	
-			//Get the current id
-			$id = $this->{$this->primaryKey};
-	
-			$this->segment($id, true);
-		}
+		//Add the id of the entry in the request
+		$this->addEntryKey();
 	
 		if ($this->softDelete)
 		{
@@ -417,15 +408,37 @@ abstract class Backenator extends Eloquent {
 	 * @return MessageBag
 	 */
 	public function errors()
-	{
+	{		
 		return $this->errors;
 	}
 	
 	/**
+	 * Add the id of the entry in the request
+	 */
+	public function addEntryKey()
+	{
+		//If we want to add automaticly the id to the request where updating
+		if(\Config::get('backenator::autoId') == true){
+		
+			//Get the current id
+			$id = $this->{$this->primaryKey};
+		
+			if($id){
+				$this->segment($id, true);
+			}
+		}
+	}
+	
+	/**
 	 * Helper to return rapidly the current request URL
+	 * 
+	 * @return Buzz\Message\Request|null
 	 */
 	public function getRequestUrl()
-	{
-		return $this->getClient()->getLastRequest()->getUrl();
+	{		
+		//If we have a last resquest
+		if($this->getClient()->getLastRequest()){		
+			return $this->getClient()->getLastRequest()->getUrl();
+		}
 	}
 }
