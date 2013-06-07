@@ -28,12 +28,9 @@ abstract class Backenator extends Eloquent {
 	public $baseUrl;
 	
 	/**
-	 * Errors message bag use to set and get errors 
-	 * from the request result
-	 * 
-	 * @var MessageBag
+	 * Errors
 	 */
-	protected $errors;
+	protected $errors = array();
 	
 	/**
 	 * The query string parameters
@@ -64,9 +61,6 @@ abstract class Backenator extends Eloquent {
 		
 		//Factory the client
 		$this->client = new Client(new CurlClientInterface());	
-		
-		//Create default error messageb bag
-		$this->errors = new MessageBag;
 	}
 
 	/**
@@ -121,7 +115,7 @@ abstract class Backenator extends Eloquent {
 		
 		$instance->addEntryKey();
 	
-		return $instance->get();	
+		return $instance->first();	
 	}
 	
 	/**
@@ -417,7 +411,7 @@ abstract class Backenator extends Eloquent {
 	 */
 	public function fail()
 	{
-		return $this->errors()->any();	
+		return !empty($this->errors);	
 	}
 	
 	/**

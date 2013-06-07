@@ -8,6 +8,8 @@ use EllipseSynergie\Backenator\Query\Builder as QueryBuilder;
  * Builder use by Backenator
  */
 class Builder {
+
+	protected $errors = array();
 	
 	/**
 	 * Create a new Eloquent query builder instance.
@@ -114,7 +116,7 @@ class Builder {
 	/**
 	 * Get errors
 	 *
-	 * @return MessageBag
+	 * @return array
 	 */
 	public function errors()
 	{

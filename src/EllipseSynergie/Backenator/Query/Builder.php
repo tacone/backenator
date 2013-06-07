@@ -31,6 +31,8 @@ abstract class Builder implements BuilderInterface {
 	 */
 	protected $from;
 	
+	protected $errors = array();
+	
 	/**
 	 * Constructor
 	 *
@@ -39,7 +41,6 @@ abstract class Builder implements BuilderInterface {
 	public function __construct(Backenator $model)
 	{
 		$this->model = $model;
-		$this->errors = new MessageBag;
 	}
 	
 	/**
@@ -261,6 +262,11 @@ abstract class Builder implements BuilderInterface {
 		}
 	} // log()
 	
+	/**
+	 * Get request errors
+	 * 
+	 * @return array
+	 */
 	public function errors()
 	{
 		return $this->errors;

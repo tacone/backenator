@@ -20,12 +20,10 @@ class BaseBuilder extends Builder {
 		
 		//Check the status code from the request
 		if(!$response->isSuccessful())
-		{
-			$this->errors->add('REQUEST_FAILED', 'Status code : ' . $response->getStatusCode() );
-			
+		{					
 			//If we have errors
 			if (!empty($content->errors)) {
-				$this->errors->add('API', $content->errors);
+				$this->errors = $content->errors;
 			}
 			
 			return false;		
@@ -67,13 +65,13 @@ class BaseBuilder extends Builder {
 	
 			// Set results count
 			if (!empty($content->count)) {
-				$this->setPerPage($content->count);
+				$this->model->setPerPage($content->count);
 			}
 	
 			//If we only have one result
-			if(count($results) === 1){
+			/*if(count($results) === 1){
 				return $results[0];
-			}
+			}*/
 	
 			//Return the results
 			return $results;
