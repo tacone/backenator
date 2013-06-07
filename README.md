@@ -2,7 +2,14 @@
 
 ORM (Object Relational Mapper) build on top of Eloquent that maps REST resources.
 
+### Status
+
 [![Build Status](https://travis-ci.org/ellipsesynergie/backenator.png?branch=master)](https://travis-ci.org/ellipsesynergie/backenator)
+
+
+### Packagist
+[![Total Downloads](https://poser.pugx.org/ellipsesynergie/backenator/downloads.png)](https://packagist.org/packages/ellipsesynergie/backenator)
+[![Latest Stable Version](https://poser.pugx.org/ellipsesynergie/backenator/v/stable.png)](https://packagist.org/packages/ellipsesynergie/backenator)
 
 ## Documentation
 
