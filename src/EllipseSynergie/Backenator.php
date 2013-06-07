@@ -136,10 +136,9 @@ abstract class Backenator extends Eloquent {
 		//Create the new instance
 		$instance = new static(array(), true);
 		$instance->{$instance->primaryKey} = $id;
-		
-		$instance->addEntryKey();
+		$instance->delete();
 	
-		return $instance->delete();
+		return $instance;
 	}
 	
 	/**
