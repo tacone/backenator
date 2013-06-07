@@ -112,7 +112,7 @@ echo $model->getRequestUrl();  // http://api.example.com/users/newest
 $model = new User;
 $users = $model->segment('newest')->get();
 
-$model->succes();  // TRUE if the request success
+$model->success();  // TRUE if the request success
 $model->fail();  // TRUE if the request fail
 ```
 
