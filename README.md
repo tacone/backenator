@@ -69,6 +69,42 @@ $user->save(); // PUT http://api.example.com/users/1
 $this->segment(1)->delete(); // DELETE http://api.example.com/users/1
 ```
 
+### Get the request URL
+```php
+$model = new User;
+$users = $model->segment('newest')->get();
+echo $model->getRequestUrl();  // http://api.example.com/users/newest
+```
+
+### Request status
+
+```php
+$model = new User;
+$users = $model->segment('newest')->get();
+
+$model->succes();  // TRUE if the request success
+$model->fail();  // TRUE if the request fail
+```
+
+### Response object
+You can get the `Buzz\Message\Response` object after a request
+
+$model = new User;
+$users = $model->segment('newest')->get();
+$request = $model->getResponse(); // Buzz\Message\Response
+
+### Client object
+You can get the client `Buzz\Browser`
+
+$model = new User;
+$users = $model->segment('newest')->get();
+$client = $model->getClient(); // Buzz\Browser
+
+### Retrieving errors
+$model = new User;
+$users = $model->segment('newest')->get();
+$errors = $model->errors();
+
 ## Authors
 
 [@ellipsesynergie](http://github.com/ellipsesynergie)
