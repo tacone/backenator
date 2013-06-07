@@ -38,7 +38,7 @@ To configure the package to meet your needs, you must publish the configuration 
 php artisan config:publish ellipsesynergie/backenator
 ```
 
-The configuration files could now be found in `app/config/packages/ellipsesynergie/backenator`. Read the description for each configurations to know what you can override.!
+The configuration files could now be found in `app/config/packages/ellipsesynergie/backenator`. Read the description for each configurations to know what you can override!
 
 ### Model
 
