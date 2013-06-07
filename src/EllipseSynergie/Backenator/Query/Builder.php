@@ -6,7 +6,8 @@ use Illuminate\Support\MessageBag;
 
 /**
  * Query builder class
- *
+ * 
+ * @author Maxime Beaudoin <maxime.beaudoin@ellipse-synergie.com>
  */
 abstract class Builder implements BuilderInterface {
 
@@ -31,7 +32,12 @@ abstract class Builder implements BuilderInterface {
 	 */
 	protected $from;
 	
-	protected $errors = array();
+	/**
+	 * Errors
+	 * 
+	 * @var mixed
+	 */
+	protected $errors;
 	
 	/**
 	 * Constructor
@@ -260,7 +266,7 @@ abstract class Builder implements BuilderInterface {
 		if (\Config::get('backenator::log') == true) {
 			\File::append(storage_path() . '/logs/backend-'.date('Y-m-d').'.log', date('Y-m-d H:i:s').' - ' . $method . ' ' . $url . print_r($result, true) . PHP_EOL);
 		}
-	} // log()
+	}
 	
 	/**
 	 * Get request errors

@@ -6,13 +6,20 @@ use EllipseSynergie\Backenator\Query\Builder as QueryBuilder;
 
 /**
  * Builder use by Backenator
+ * 
+ * @author Maxime Beaudoin <maxime.beaudoin@ellipse-synergie.com>
  */
 class Builder {
 
-	protected $errors = array();
+	/**
+	 * Errors
+	 * 
+	 * @var mixed
+	 */
+	protected $errors;
 	
 	/**
-	 * Create a new Eloquent query builder instance.
+	 * Constructor
 	 *
 	 * @param  \Illuminate\Database\Query\Builder  $query
 	 * @return void
@@ -22,7 +29,7 @@ class Builder {
 		$this->query = $query;
 	}
 	
-/**
+	/**
 	 * Set a model instance for the model being queried.
 	 *
 	 * @param  \EllipseSynergie\Backenator  $model
