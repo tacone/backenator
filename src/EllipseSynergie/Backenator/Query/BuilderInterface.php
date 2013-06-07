@@ -2,8 +2,7 @@
 namespace EllipseSynergie\Backenator\Query;
 
 /**
- * Query builder class
- *
+ * Query builder interface
  */
 interface BuilderInterface {
 	/**
