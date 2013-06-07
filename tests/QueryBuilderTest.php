@@ -51,7 +51,7 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$queryBuilder = new Backenator\Query\BaseBuilder($model);
 		$result = $queryBuilder->get();
 		
-		$this->assertEquals('foo', $result->name);
+		$this->assertEquals('foo', $result[0]->name);
 	}
 	
 	public function testPostSucces()

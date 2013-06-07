@@ -32,8 +32,9 @@ class BackenatorTest extends PHPUnit_Framework_TestCase {
 	{
 		$model = new BackenatorStub;
 		$model->setClient($this->mockSuccess('get'));
+		$result = $model->get();
 		
-		$this->assertInstanceOf('EllipseSynergie\Backenator', $model->get());
+		$this->assertInstanceOf('EllipseSynergie\Backenator', $result[0]);
 	}
 	
 	public function testFirst()
