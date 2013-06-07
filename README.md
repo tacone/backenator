@@ -89,21 +89,28 @@ $model->fail();  // TRUE if the request fail
 ### Response object
 You can get the `Buzz\Message\Response` object after a request
 
+```php
 $model = new User;
 $users = $model->segment('newest')->get();
 $request = $model->getResponse(); // Buzz\Message\Response
+```
 
 ### Client object
 You can get the client `Buzz\Browser`
 
+```php
 $model = new User;
 $users = $model->segment('newest')->get();
 $client = $model->getClient(); // Buzz\Browser
+```
 
 ### Retrieving errors
+
+```php
 $model = new User;
 $users = $model->segment('newest')->get();
 $errors = $model->errors();
+```
 
 ## Authors
 
