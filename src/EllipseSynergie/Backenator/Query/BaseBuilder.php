@@ -34,6 +34,25 @@ class BaseBuilder extends Builder {
 	}
 	
 	/**
+	 * Get the insert id
+	 * 
+	 * @param \Buzz\Message\Response $response
+	 * @return boolean
+	 */
+	public function insertId(\Buzz\Message\Response $response)
+	{
+		$primaryKey = $this->model->getPrimaryKey();
+		$content = json_decode($response->getContent());
+		
+		if(!empty($content->{$primaryKey}))
+		{
+			return $content->{$primaryKey};
+		}
+		
+		return true;
+	}
+	
+	/**
 	 * Build the request results
 	 *
 	 * @param object $content

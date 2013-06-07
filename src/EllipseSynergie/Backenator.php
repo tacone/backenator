@@ -143,6 +143,28 @@ abstract class Backenator extends Eloquent {
 	}
 	
 	/**
+	 * Update the model in the database.
+	 *
+	 * @param  array  $attributes
+	 * @return mixed
+	 */
+	public function update(array $attributes = array())
+	{
+		return $this->performUpdate($this->newQuery());
+	}
+	
+	/**
+	 * Insert the model in the database.
+	 *
+	 * @param  array  $attributes
+	 * @return mixed
+	 */
+	public function insert()
+	{
+		return $this->performInsert($this->newQuery());
+	}
+	
+	/**
 	 * Add query string parameter to the request
 	 *
 	 * @param string $field
@@ -198,6 +220,16 @@ abstract class Backenator extends Eloquent {
 	public function getClient()
 	{
 		return $this->client;		
+	}
+	
+	/**
+	 * Get the modal primary key
+	 * 
+	 * @return string
+	 */
+	public function getPrimaryKey()
+	{
+		return $this->primaryKey;		
 	}
 	
 	/**
@@ -291,9 +323,12 @@ abstract class Backenator extends Eloquent {
 		}
 	
 		// Do the query
-		$query->insert($this->attributes);
+		$id = $query->insert($this->attributes);
 		$this->setResponse($query->getResponse());
 		$this->errors = $query->errors();
+		
+		// Set id
+		$this->setAttribute($this->primaryKey, $id);
 	
 		// We will go ahead and set the exists property to true, so that it is set when
 		// the created event is fired, just in case the developer tries to update it

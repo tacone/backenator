@@ -16,6 +16,14 @@ interface BuilderInterface {
 	public function success(\Buzz\Message\Response $response);
 	
 	/**
+	 * Get the insert id
+	 *
+	 * @param \Buzz\Message\Response $response
+	 * @return boolean
+	 */
+	public function insertId(\Buzz\Message\Response $response);
+	
+	/**
 	 * Build the request results
 	 *
 	 * @param object $content

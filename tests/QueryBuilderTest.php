@@ -56,9 +56,22 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 	
 	public function testPostSucces()
 	{		
+		//Mock rest client
+		$mock = m::mock('Buzz\Browser');
+		
+		//Mock rest client response
+		$mock_response = m::mock('Buzz\Message\Response');
+		
+		//Response get content
+		$mock_response->shouldReceive('getContent')->times(4)->andReturn('{"success":true, "results":[{"name":"foo"}]}');
+		$mock_response->shouldReceive('isSuccessful')->once()->andReturn(true);
+		
+		//Rest client get
+		$mock->shouldReceive('post')->once()->andReturn($mock_response);
+		
 		//Create the model
 		$model = new BackenatorStub;
-		$model->setClient($this->mockSuccess('post'));
+		$model->setClient($mock);
 		
 		$queryBuilder = new Backenator\Query\BaseBuilder($model);
 		$result = $queryBuilder->post(array());
