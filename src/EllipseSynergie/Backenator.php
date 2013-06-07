@@ -30,7 +30,7 @@ abstract class Backenator extends Eloquent {
 	/**
 	 * Errors
 	 */
-	protected $errors = array();
+	protected $errors;
 	
 	/**
 	 * The query string parameters
@@ -56,10 +56,10 @@ abstract class Backenator extends Eloquent {
 		//Parent constructor
 		parent::__construct($attributes);
 		
-		//Set the default base url
+		//Set the default base url from configuration
 		$this->setBaseUrl(\Config::get('backenator::baseUrl'));
 		
-		//Factory the client
+		//Factory the client use to do request
 		$this->client = new Client(new CurlClientInterface());	
 	}
 
@@ -70,9 +70,16 @@ abstract class Backenator extends Eloquent {
 	 */
 	public function get()
 	{
+		//Create the query builder object
 		$query = $this->newQuery();
+		
+		//Get entries
 		$result = $query->get();
+		
+		//Set the response object from the query to the current model
 		$this->setResponse($query->getResponse());
+		
+		//Set errorst from the query to the current model
 		$this->errors = $query->errors();
 	
 		return $result;
@@ -101,7 +108,7 @@ abstract class Backenator extends Eloquent {
 	
 	
 	/**
-	 * Find a model by its primary key.
+	 * Find a model by primary key.
 	 *
 	 * @param  mixed  $id
 	 * @param  array  $columns
@@ -119,16 +126,16 @@ abstract class Backenator extends Eloquent {
 	}
 	
 	/**
-	 * Destroy the models for the given IDs.
+	 * Destroy the models for the given id.
 	 *
 	 * @param  array|int  $ids
 	 * @return void
 	 */
-	public static function destroy($ids)
+	public static function destroy($id)
 	{
 		//Create the new instance
 		$instance = new static(array(), true);
-		$instance->{$instance->primaryKey} = $ids;
+		$instance->{$instance->primaryKey} = $id;
 		
 		$instance->addEntryKey();
 	
@@ -194,9 +201,9 @@ abstract class Backenator extends Eloquent {
 	}
 	
 	/**
-	 * Get a new query builder for the model's table.
+	 * Create a new query builder for the model's table.
 	 *
-	 * @param  bool  $excludeDeleted
+	 * @param  bool  $excludeDeleted // not supported yet
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
 	public function newQuery($excludeDeleted = true)
@@ -216,8 +223,6 @@ abstract class Backenator extends Eloquent {
 	
 		return $builder;
 	}
-	
-
 
 	/**
 	 * Perform a model update operation.
@@ -253,6 +258,7 @@ abstract class Backenator extends Eloquent {
 			//Add the id of the entry in the request
 			$this->addEntryKey();
 				
+			// Do the query
 			$query->update($dirty);
 			$this->setResponse($query->getResponse());
 			$this->errors = $query->errors();
@@ -425,11 +431,11 @@ abstract class Backenator extends Eloquent {
 	}
 	
 	/**
-	 * Add the id of the entry in the request
+	 * Add the entry id in the request
 	 */
 	public function addEntryKey()
 	{
-		//If we want to add automaticly the id to the request where updating
+		//If we want to add automaticly the id to the request
 		if(\Config::get('backenator::autoId') == true){
 		
 			//Get the current id
