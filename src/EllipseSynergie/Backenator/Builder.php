@@ -6,6 +6,8 @@ use EllipseSynergie\Backenator\Query\Builder as QueryBuilder;
 
 /**
  * Builder use by Backenator
+ * 
+ * @author Maxime Beaudoin <maxime.beaudoin@ellipse-synergie.com>
  */
 class Builder {
 

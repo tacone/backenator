@@ -2,8 +2,9 @@
 namespace EllipseSynergie\Backenator\Query;
 
 /**
- * Query builder class
- *
+ * Base query builder
+ * 
+ * @author Maxime Beaudoin <maxime.beaudoin@ellipse-synergie.com>
  */
 class BaseBuilder extends Builder {
 
@@ -67,11 +68,6 @@ class BaseBuilder extends Builder {
 			if (!empty($content->count)) {
 				$this->model->setPerPage($content->count);
 			}
-	
-			//If we only have one result
-			/*if(count($results) === 1){
-				return $results[0];
-			}*/
 	
 			//Return the results
 			return $results;
