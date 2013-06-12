@@ -42,5 +42,17 @@ return array(
 	| By default, each request will be log into the logs folder
 	|
 	*/
-	'log' => true
+	'log' => true,		
+		
+	/*
+	|--------------------------------------------------------------------------
+	| Curl option
+	|--------------------------------------------------------------------------
+	|
+	| @see http://php.net/manual/en/function.curl-setopt.php
+	|
+	*/
+	'options' => array(
+		CURLOPT_TIMEOUT => 10
+	)
 );

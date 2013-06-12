@@ -10,9 +10,10 @@ if(!class_exists('Config')){
 			
 			$config = array(
 				'queryBuilder' => '\EllipseSynergie\Backenator\Query\BaseBuilder',
-				'baseUrl' => 'http://api.als11.ellipsesynergie.loc/',
+				'baseUrl' => 'http://api.example.com/',
 				'autoId' => true,
-				'log' => false
+				'log' => false,
+				'options' => array()
 			);
 			
 			if(in_array($name, $config)){

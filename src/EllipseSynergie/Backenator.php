@@ -56,11 +56,25 @@ abstract class Backenator extends Eloquent {
 		//Parent constructor
 		parent::__construct($attributes);
 		
+		//Create curl client
+		$curl = new CurlClientInterface;
+		
 		//Set the default base url from configuration
 		$this->setBaseUrl(\Config::get('backenator::baseUrl'));
 		
+		//Get client options
+		$options = \Config::get('backenator::options');
+		
+		//If we have options
+		if(!empty($options)){
+		
+			foreach ($options as $option => $value){
+				$curl->setOption($option, $value);			
+			}
+		}
+		
 		//Factory the client use to do request
-		$this->client = new Client(new CurlClientInterface());	
+		$this->client = new Client($curl);	
 	}
 
 	/**
