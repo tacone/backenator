@@ -104,8 +104,11 @@ abstract class Builder implements BuilderInterface {
 		//Log the request
 		$this->log('POST', $url, $response->getContent());
 		
+		//Handle the put method
+		$result = $this->success($response);
+		
 		//If request success
-		if($this->success($response)){
+		if($result){
 		
 			//Get Insert Id
 			$result = $this->insertId($response);
