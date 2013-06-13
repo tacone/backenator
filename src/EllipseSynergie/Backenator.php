@@ -83,20 +83,8 @@ abstract class Backenator extends Eloquent {
 	 * @return Backenator|array
 	 */
 	public function get()
-	{
-		//Create the query builder object
-		$query = $this->newQuery();
-		
-		//Get entries
-		$result = $query->get();
-		
-		//Set the response object from the query to the current model
-		$this->setResponse($query->getResponse());
-		
-		//Set errorst from the query to the current model
-		$this->errors = $query->errors();
-	
-		return $result;
+	{		
+		return $this->performSearch($this->newQuery());		
 	}
 	
 	/**
@@ -293,6 +281,31 @@ abstract class Backenator extends Eloquent {
 		$builder->setModel($this);
 	
 		return $builder;
+	}
+	
+	/**
+	 * 
+	 */
+	protected function performSearch($query)
+	{
+		// If the updating event returns false, we will cancel the searching operation
+		if ($this->fireModelEvent('searching') === false)
+		{
+			return false;
+		}
+		
+		//Get entries
+		$result = $query->get();
+		
+		//Set the response object from the query to the current model
+		$this->setResponse($query->getResponse());
+		
+		//Set errorst from the query to the current model
+		$this->errors = $query->errors();
+		
+		$this->fireModelEvent('found', false);
+		
+		return $result;
 	}
 
 	/**
@@ -532,5 +545,29 @@ abstract class Backenator extends Eloquent {
 		if($this->getClient()->getLastRequest()){		
 			return $this->getClient()->getLastRequest()->getUrl();
 		}
+	}
+	
+	
+	/**
+	 * Register a searching model event with the dispatcher.
+	 *
+	 * @param  Closure|string  $callback
+	 * @return void
+	 */
+	public static function searching($callback)
+	{
+		static::registerModelEvent('searching', $callback);
+	}
+	
+	
+	/**
+	 * Register a found model event with the dispatcher.
+	 *
+	 * @param  Closure|string  $callback
+	 * @return void
+	 */
+	public static function found($callback)
+	{
+		static::registerModelEvent('found', $callback);
 	}
 }
