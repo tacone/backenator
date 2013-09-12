@@ -55,7 +55,10 @@ abstract class Builder implements BuilderInterface {
 	 * @return Backenator|array
 	 */
 	public function get()
-	{								
+	{							
+		//Default
+		$result = array();
+		
 		//Build the url
 		$url = $this->url();
 		
@@ -68,11 +71,8 @@ abstract class Builder implements BuilderInterface {
 		//Log the request
 		$this->log('GET', $url, $response->getContent());
 		
-		//Handle the get method
-		$result = $this->success($response);
-		
 		//If we have a result
-		if(!empty($result)){				
+		if($this->success($response)){				
 			$result = $this->buildResults($content);
 		}
 		

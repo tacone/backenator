@@ -90,12 +90,17 @@ abstract class Backenator extends Eloquent {
 	/**
 	 * Retrieve the first element
 	 *
-	 * @return Backenator|bool
+	 * @return Backenator|null
 	 */
 	public function first()
 	{
 		//Get elements
 		$result = $this->get();
+		
+		//If we don't have data
+		if(empty($result)){
+			return null;
+		}
 	
 		//If we have multiple result
 		if(is_array($result)){
