@@ -317,7 +317,7 @@ abstract class Backenator extends Eloquent {
 	 * @param  \Illuminate\Database\Eloquent\Builder
 	 * @return bool
 	 */
-	protected function performUpdate($query)
+	protected function performUpdate(\Illuminate\Database\Eloquent\Builder $query)
 	{
 		$dirty = $this->getDirty();
 	
@@ -361,7 +361,7 @@ abstract class Backenator extends Eloquent {
 	 * @param  \Illuminate\Database\Eloquent\Builder
 	 * @return bool
 	 */
-	protected function performInsert($query)
+	protected function performInsert(\Illuminate\Database\Eloquent\Builder $query)
 	{
 		if ($this->fireModelEvent('creating') === false) {
 			return false;
