@@ -1,5 +1,4 @@
-<?php 
-namespace EllipseSynergie;
+<?php namespace EllipseSynergie;
 
 use \Buzz\Browser as Client;
 use \Buzz\Client\Curl as CurlClientInterface;
@@ -66,7 +65,7 @@ abstract class Backenator extends Eloquent {
 		$options = \Config::get('backenator::options');
 		
 		//If we have options
-		if(!empty($options)){
+		if (!empty($options)) {
 		
 			foreach ($options as $option => $value){
 				$curl->setOption($option, $value);			
@@ -98,12 +97,12 @@ abstract class Backenator extends Eloquent {
 		$result = $this->get();
 		
 		//If we don't have data
-		if(empty($result)){
+		if (empty($result)) {
 			return null;
 		}
 	
 		//If we have multiple result
-		if(is_array($result)){
+		if (is_array($result)) {
 	
 			//Get the first array element
 			reset($result);
@@ -112,8 +111,7 @@ abstract class Backenator extends Eloquent {
 	
 		return $result;
 	}
-	
-	
+
 	/**
 	 * Find a model by primary key.
 	 *
@@ -177,7 +175,9 @@ abstract class Backenator extends Eloquent {
 	 */
 	public function delete()
 	{
-		if ($this->fireModelEvent('deleting') === false) return false;
+		if ($this->fireModelEvent('deleting') === false) {
+			return false;
+		}
 	
 		// Here, we'll touch the owning models, verifying these timestamps get updated
 		// for the models. This will allow any caching to get broken on the parents
@@ -223,7 +223,7 @@ abstract class Backenator extends Eloquent {
 		$segment = urlencode($segment);
 		
 		//If we want to add the segment at the begin
-		if($first == true){
+		if ($first == true) {
 			array_unshift($this->segments, $segment);
 			
 		//Else we want to add the segment at the end
@@ -272,7 +272,6 @@ abstract class Backenator extends Eloquent {
 	 */
 	public function newQuery($excludeDeleted = true)
 	{		
-		
 		//Builder classnam
 		$builderName = \Config::get('backenator::queryBuilder');
 		
@@ -294,8 +293,7 @@ abstract class Backenator extends Eloquent {
 	protected function performSearch($query)
 	{
 		// If the updating event returns false, we will cancel the searching operation
-		if ($this->fireModelEvent('searching') === false)
-		{
+		if ($this->fireModelEvent('searching') === false) {
 			return false;
 		}
 		
@@ -323,27 +321,23 @@ abstract class Backenator extends Eloquent {
 	{
 		$dirty = $this->getDirty();
 	
-		if (count($dirty) > 0)
-		{
+		if (count($dirty) > 0) {
+
 			// If the updating event returns false, we will cancel the update operation so
 			// developers can hook Validation systems into their models and cancel this
 			// operation if the model does not pass validation. Otherwise, we update.
-			if ($this->fireModelEvent('updating') === false)
-			{
+			if ($this->fireModelEvent('updating') === false) {
 				return false;
 			}
 	
 			// First we need to create a fresh query instance and touch the creation and
 			// update timestamp on the model which are maintained by us for developer
 			// convenience. Then we will just continue saving the model instances.
-			if ($this->timestamps)
-			{
+			if ($this->timestamps) {
 				$this->updateTimestamps();
-	
 				$dirty = $this->getDirty();
 			}
-	
-				
+
 			//Add the id of the entry in the request
 			$this->addEntryKey();
 				
@@ -369,13 +363,14 @@ abstract class Backenator extends Eloquent {
 	 */
 	protected function performInsert($query)
 	{
-		if ($this->fireModelEvent('creating') === false) return false;
+		if ($this->fireModelEvent('creating') === false) {
+			return false;
+		}
 	
 		// First we'll need to create a fresh query instance and touch the creation and
 		// update timestamps on this model, which are maintained by us for developer
 		// convenience. After, we will just continue saving these model instances.
-		if ($this->timestamps)
-		{
+		if ($this->timestamps) {
 			$this->updateTimestamps();
 		}
 	
@@ -409,12 +404,9 @@ abstract class Backenator extends Eloquent {
 		//Add the id of the entry in the request
 		$this->addEntryKey();
 	
-		if ($this->softDelete)
-		{
+		if ($this->softDelete) {
 			$query->update(array(static::DELETED_AT => new DateTime));
-		}
-		else
-		{
+		} else {
 			$query->delete();
 		}
 	
@@ -528,12 +520,12 @@ abstract class Backenator extends Eloquent {
 	public function addEntryKey()
 	{
 		//If we want to add automaticly the id to the request
-		if(\Config::get('backenator::autoId') == true){
+		if (\Config::get('backenator::autoId') == true) {
 		
 			//Get the current id
 			$id = $this->{$this->primaryKey};
 		
-			if($id){
+			if ($id) {
 				$this->segment($id, true);
 			}
 		}
@@ -547,12 +539,11 @@ abstract class Backenator extends Eloquent {
 	public function getRequestUrl()
 	{		
 		//If we have a last resquest
-		if($this->getClient()->getLastRequest()){		
+		if ($this->getClient()->getLastRequest()) {		
 			return $this->getClient()->getLastRequest()->getUrl();
 		}
 	}
-	
-	
+
 	/**
 	 * Register a searching model event with the dispatcher.
 	 *
@@ -563,8 +554,7 @@ abstract class Backenator extends Eloquent {
 	{
 		static::registerModelEvent('searching', $callback);
 	}
-	
-	
+
 	/**
 	 * Register a found model event with the dispatcher.
 	 *
@@ -575,4 +565,5 @@ abstract class Backenator extends Eloquent {
 	{
 		static::registerModelEvent('found', $callback);
 	}
-}
+
+} // Backenator
