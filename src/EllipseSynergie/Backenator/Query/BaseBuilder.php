@@ -64,10 +64,10 @@ class BaseBuilder extends Builder {
 		$results = array();
 	
 		//If we have content
-		if (!empty($content->results)) {
+		if (!empty($content)) {
 	
 			//For each data result
-			foreach ($content->results as $result) {
+			foreach ($content as $result) {
 					
 				//Create a new modal object
 				$object = $this->model->newInstance(array(), true);
